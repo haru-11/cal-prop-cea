@@ -2,7 +2,7 @@
 propulsion performance calcuration using NASA-CEA
 
 ## 概要
-NASA-CEAを組み込んだ解析ソフトを作りたい。
+NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEAを使って実験データからグラフが出せるようにする。
 
 ## 導入方法
 以下のモジュールを使って環境を構築した。
@@ -20,8 +20,8 @@ NASA-CEAを組み込んだ解析ソフトを作りたい。
   https://github.com/sonofeft/RocketCEA/issues/11  
   https://visualstudio.microsoft.com/ja/visual-cpp-build-tools/  
   私は諸々エラーが出て公式クイックスタートの通りにできなかったので、optionなしの`pip install rocketcea`で入れた。そうすると、[こちら](https://github.com/sonofeft/RocketCEA/issues/11#issuecomment-665428405)のエラーがでたので、コメントを参考に \.libs フォルダにある .dll ファイルをrocketceaフォルダ直下に移動することで解決した。
-  3. **動作確認**
+  3. **動作確認**  
   `python -c "from rocketcea.cea_obj import CEA_Obj; C=CEA_Obj(oxName='LOX', fuelName='LH2'); print(C.get_Isp())"`
   と打って、`374.30361765576265`と出ればOK
-- Git hub
-- Visual Studio Code
+- **Git hub**
+- **Visual Studio Code**
