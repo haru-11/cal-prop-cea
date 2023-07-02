@@ -9,6 +9,7 @@ NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEA
 - **Anaconda**  
   自分の他のPython環境と競合しそうなひとは、Anacondaなど、仮想環境が作れるものを入れる。まあ初めての人も、Anacondaは便利なので入れてみよう。  
   pythonは3.9  
+  **WSLでUbuntuを入れるのが最も簡単説ある．．**  
 - **Rocket CEA**
   1. まず、gfortranコンパイラを入れる。以下サイトを参考にするが、**RocketCEAの導入**は行わない。  
   https://makkiblog.com/rocketcea_intro/  
