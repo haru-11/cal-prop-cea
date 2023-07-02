@@ -26,3 +26,8 @@ NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEA
   と打って、`374.30361765576265`と出ればOK
 - **Git hub**
 - **Visual Studio Code**
+- Windows WSL 導入メモ
+  https://learn.microsoft.com/ja-jp/windows/wsl/install
+  https://rocketcea.readthedocs.io/en/latest/quickstart.html#windows-10-with-wsl
+  https://tenshoku-miti.com/takepon/windows-vscode-ternimal-ubuntu/
+  https://qiita.com/setonao/items/28749762c0bc1fbbf502
