@@ -1,7 +1,137 @@
-from rocketcea.cea_obj import CEA_Obj 
+# -*- coding: utf-8 -*-
+from rocketcea.cea_obj import CEA_Obj, add_new_oxidizer
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
 
-ispObj = CEA_Obj( oxName='LOX', fuelName='CH4')
-str = ispObj.get_full_cea_output( Pc=100.0, MR=6.0, eps=40.0, short_output=1, pc_units='bar', output='siunits')
-# str = ispObj.get_full_cea_output( Pc=1000.0, MR=6.0, eps=40.0, frozen=1, frozenAtThroat=1, pc_units='bar')  # 凍結流の場合はこういうオプションをつける
+card_str = """
+oxid H2O2(L) H 2 O 2  wt%=60.00
+h,cal=-44880.0     t(k)=298.15  rho.g/cc=1.407
+oxid = WATER H 2.0 O 1.0 wt%= 40.0
+h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
+"""
+add_new_oxidizer( '60_H2O2', card_str )
+ispObj = CEA_Obj( oxName='60_H2O2', fuelName='C2H5OH')
 
-print(str)
+filename = 'C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\01_0.6MPaA_30s\\auto$0.csv'
+with open(filename, newline='') as f:
+    reader = csv.reader(f)
+    data_csv = [row for row in reader] #dataの始まりは62行目
+
+data_len = len(data_csv) - 66
+header = data_csv[61]
+print(data_len)
+print(data_csv[data_len+62])
+print(header[0])
+
+valve_data = []
+chamber_pressure_data = []
+flow_rate_data = []
+chamber_temperature_data = []
+cstar_data = []
+cf_data = []
+
+#計算するデータ範囲取得
+valve_open_num = 0
+plt_start_num = 0
+plt_end_num = 0
+for i in range(data_len):
+    if float(data_csv[i+62][9]) > 3.00 and valve_open_num == 0:
+        valve_open_num = i + 62
+        plt_start_num = valve_open_num - 200
+    if float(data_csv[i+62][9]) < 3.00 and plt_start_num > 0 and plt_end_num == 0:
+        plt_end_num = i + 200
+#--------------------------
+
+#各データをlistに入れる．
+for i in range(plt_start_num,plt_end_num):
+    valve_data.append(float(data_csv[i][9]))
+    chamber_pressure_data.append(float(data_csv[i][3]))
+    flow_rate_data.append(float(data_csv[i][5]))
+    chamber_temperature_data.append(float(data_csv[i][8]))
+
+    pambcf = ispObj.getFrozen_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][3])*145.038), MR=7.4, eps=100.0, frozenAtThroat=0)
+    vac_cstar_tc = ispObj.get_IvacCstrTc((float(data_csv[i][3])*145.038), MR=7.4, eps=100.0, frozen=1, frozenAtThroat=0) 
+    cstar_data.append(float(vac_cstar_tc[1])*0.3048)
+    #isp_vac = float(vac_cstar_tc[0])
+    cf_data.append(float(pambcf[0]))
+#--------------------------
+
+#グラフ描写
+x = np.arange(0, len(valve_data)/100, 1/100)
+fig1 = plt.figure(figsize=[16,9.0])
+ax1_1 = fig1.add_subplot(2, 2, 1)
+ax1_1.plot(x,chamber_pressure_data, color = "red", label = "pressure")
+#ax1.legend(['pressure']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax1_1.set_ylim(0, 0.7) # プロットのY範囲
+
+ax1_2 = ax1_1.twinx()
+ax1_2.plot(x,chamber_temperature_data, color = "green", label = "temp")
+#ax2.legend(['valve']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax1_2.set_ylim(0, 1500) # プロットのY範囲
+
+ax1_3 = ax1_1.twinx()
+ax1_3.plot(x,valve_data, color = "blue", label = "valve")
+#ax2.legend(['valve']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax1_3.set_ylim(0, 6) # プロットのY範囲
+ax1_3.axis("off")
+
+#凡例
+h1, l1 = ax1_1.get_legend_handles_labels()
+h2, l2 = ax1_2.get_legend_handles_labels()
+ax1_1.legend(h1+h2, l1+l2)
+
+#グラフ描写の二つ目
+ax2_1 = fig1.add_subplot(2, 2, 2)
+ax2_1.plot(x,chamber_pressure_data, color = "red", label = "pressure")
+#ax1.legend(['pressure']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax2_1.set_ylim(0, 0.7) # プロットのY範囲
+
+ax2_2 = ax2_1.twinx()
+ax2_2.plot(x,flow_rate_data, color = "c", label = "flow_rate")
+#ax2.legend(['valve']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax2_2.set_ylim(0, 2) # プロットのY範囲
+
+ax2_3 = ax2_1.twinx()
+ax2_3.plot(x,valve_data, color = "blue", label = "valve")
+#ax2.legend(['valve']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax2_3.set_ylim(0, 6) # プロットのY範囲
+ax2_3.axis("off")
+
+#凡例
+h1, l1 = ax2_1.get_legend_handles_labels()
+h2, l2 = ax2_2.get_legend_handles_labels()
+ax2_1.legend(h1+h2, l1+l2)
+
+#グラフ描写の３つ目
+ax3_1 = fig1.add_subplot(2, 2, 3)
+ax3_1.plot(x,cstar_data, color = "k", label = "cstar")
+#ax1.legend(['pressure']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax3_1.set_ylim(1313, 1317) # プロットのY範囲
+
+ax3_2 = ax3_1.twinx()
+ax3_2.plot(x,cf_data, color = "c", label = "cf")
+#ax2.legend(['valve']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax3_2.set_ylim(1.856, 1.860) # プロットのY範囲
+
+ax3_3 = ax3_1.twinx()
+ax3_3.plot(x,valve_data, color = "blue", label = "valve")
+#ax2.legend(['valve']) # 凡例の表示
+#ax.set_xlim(0, 8)  # プロットのX範囲
+ax3_3.set_ylim(0, 6) # プロットのY範囲
+ax3_3.axis("off")
+
+#凡例
+h1, l1 = ax3_1.get_legend_handles_labels()
+h2, l2 = ax3_2.get_legend_handles_labels()
+ax3_1.legend(h1+h2, l1+l2)
+
+plt.show()
