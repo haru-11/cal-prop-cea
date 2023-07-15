@@ -13,10 +13,11 @@ h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
 add_new_oxidizer( '60_H2O2', card_str )
 ispObj = CEA_Obj( oxName='60_H2O2', fuelName='C2H5OH')
 
-filename = 'C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\01_0.6MPaA_30s\\auto$0.csv'
-with open(filename, newline='') as f:
+#filename = 'C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\01_0.6MPaA_30s\\auto$0.csv'
+filename = '/home/haru-11/cal-prop-cea/01_0.6MPaA_30s/auto$0.csv'
+with open(filename, newline='', encoding="shift-jis") as f:
     reader = csv.reader(f)
-    data_csv = [row for row in reader] #dataの始まりは62行目
+    data_csv = [row for row in reader] #data start at 62rows
 
 data_len = len(data_csv) - 66
 header = data_csv[61]
@@ -134,4 +135,5 @@ h1, l1 = ax3_1.get_legend_handles_labels()
 h2, l2 = ax3_2.get_legend_handles_labels()
 ax3_1.legend(h1+h2, l1+l2)
 
-plt.show()
+#plt.show()
+plt.savefig('result.png')
