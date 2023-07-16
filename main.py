@@ -40,16 +40,25 @@ Pre_TRG = 2 #[sec]バルブ開の前後何秒グラフ描写,データ生成す�
 Valve_TRG = 3.00 #[V]バルブの立ち上がりのエッジトリガの閾値
 Statick_ratio = 0.2 #[-]定常区間の割合を指定
 
+valve_column = 9 #CSVの何列目かを書く．A列が0，B列が1である．
+Pc_column = 3
+Pt_column = 2
+Pa_column = 4
+flow_rate_column = 5
+Tc_column = 8
+
 At = ((At_diameter/2.0)*(At_diameter/2.0))*(np.pi)
 valve_data = []
 chamber_pressure_data = []
+supply_pressure_data = []
+above_pressure_data = []
 flow_rate_data = []
 chamber_temperature_data = []
 cstar_data = []
 cf_data = []
 thrust_data = []
 isp_vac_data = []
-result_data_ave = [["No","start","end","Pc_A","Pt_A","Mmfr_A","Isp_A","F_A"]]
+result_data_ave = [["No","start","end","Pt_A","Pa_A","Pc_A","Pt_A","Mmfr_A","Isp_A","F_A"]]
 #---------------
 
 #計算するデータ範囲取得
@@ -66,20 +75,22 @@ for i in range(data_len):
 
 #各データをlistに入れる．
 for i in range(plt_start_num,plt_end_num):
-    valve_data.append(float(data_csv[i][9]))
-    chamber_pressure_data.append(float(data_csv[i][3]))
-    flow_rate_data.append(float(data_csv[i][5]))
-    chamber_temperature_data.append(float(data_csv[i][8]))
+    valve_data.append(float(data_csv[i][valve_column]))
+    chamber_pressure_data.append(float(data_csv[i][Pc_column]))
+    supply_pressure_data.append(float(data_csv[i][Pt_column]))
+    above_pressure_data.append(float(data_csv[i][Pa_column]))
+    flow_rate_data.append(float(data_csv[i][flow_rate_column]))
+    chamber_temperature_data.append(float(data_csv[i][Tc_column]))
 
-    pambcf = ispObj.getFrozen_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][3])*145.038), MR=7.4, eps=100.0, frozenAtThroat=0)
-    vac_cstar_tc = ispObj.get_IvacCstrTc((float(data_csv[i][3])*145.038), MR=7.4, eps=100.0, frozen=1, frozenAtThroat=0) 
+    pambcf = ispObj.getFrozen_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column])*145.038), MR=7.4, eps=100.0, frozenAtThroat=0)
+    vac_cstar_tc = ispObj.get_IvacCstrTc((float(data_csv[i][Pc_column])*145.038), MR=7.4, eps=100.0, frozen=1, frozenAtThroat=0) 
     cstar_data.append(float(vac_cstar_tc[1])*0.3048)
     cf_data.append(float(pambcf[0]))
-    thrust_data.append(float(data_csv[i][3])*float(pambcf[0])*At*1000)
+    thrust_data.append(float(data_csv[i][Pc_column])*float(pambcf[0])*At*1000)
     if i < (plt_start_num+(Pre_TRG*Interval)) or i > (plt_end_num-(Pre_TRG*Interval)):
         isp_vac_data.append(0.0)
     else:
-        isp_vac_data.append(float(data_csv[i][3])*float(pambcf[0])*At*1000/(float(data_csv[i][5])*OF_RHO*9.80665))
+        isp_vac_data.append(float(data_csv[i][3])*float(pambcf[0])*At*1000/(float(data_csv[i][flow_rate_column])*OF_RHO*9.80665))
 x = np.arange((0-Pre_TRG), len(valve_data)/Interval-Pre_TRG, 1/Interval) #バルブデータから時間を生成
 #------------------------------
 
@@ -87,13 +98,15 @@ x = np.arange((0-Pre_TRG), len(valve_data)/Interval-Pre_TRG, 1/Interval) #バル
 Static_start_num = int((plt_end_num - plt_start_num - (Pre_TRG*Interval*2))*(1-Statick_ratio)) + int(Pre_TRG*Interval)
 Static_end_num = int(plt_end_num - plt_start_num - (Pre_TRG*Interval*2)) + int(Pre_TRG*Interval)
 chamber_pressure_ave = sum(chamber_pressure_data[Static_start_num : Static_end_num])/len(chamber_pressure_data[Static_start_num : Static_end_num])
+supply_pressure_ave = sum(supply_pressure_data[Static_start_num : Static_end_num])/len(supply_pressure_data[Static_start_num : Static_end_num])
+above_pressure_ave = sum(above_pressure_data[Static_start_num : Static_end_num])/len(above_pressure_data[Static_start_num : Static_end_num])
 chamber_temperature_ave = sum(chamber_temperature_data[Static_start_num : Static_end_num])/len(chamber_temperature_data[Static_start_num : Static_end_num])
 flow_rate_ave = sum(flow_rate_data[Static_start_num : Static_end_num])/len(flow_rate_data[Static_start_num : Static_end_num])
 isp_vac_ave = sum(isp_vac_data[Static_start_num : Static_end_num])/len(isp_vac_data[Static_start_num : Static_end_num])
 thrust_ave = sum(thrust_data[Static_start_num : Static_end_num])/len(thrust_data[Static_start_num : Static_end_num])
 
 #print(Static_start_num,Static_end_num)
-result_data_ave.append([1,(Static_start_num-(Pre_TRG*Interval))/Interval, (Static_end_num-(Pre_TRG*Interval))/Interval, chamber_pressure_ave, chamber_temperature_ave, flow_rate_ave, isp_vac_ave, thrust_ave])
+result_data_ave.append([1,(Static_start_num-(Pre_TRG*Interval))/Interval, (Static_end_num-(Pre_TRG*Interval))/Interval, supply_pressure_ave, above_pressure_ave, chamber_pressure_ave, chamber_temperature_ave, flow_rate_ave, isp_vac_ave, thrust_ave])
 #chamber_pressure_ave = sum(chamber_pressure_data[((plt_end_num - plt_start_num - (Pre_TRG*Interval*2))*(1-Statick_ratio)) : (plt_end_num - plt_start_num - (Pre_TRG*Interval*2))]) / len(chamber_pressure_data[((plt_end_num - plt_start_num - (Pre_TRG*Interval*2))*(1-Statick_ratio)) : (plt_end_num - plt_start_num - (Pre_TRG*Interval*2))])
 
 with open(filename_result_ave, 'w', newline='') as f: #csvで平均値を保存
@@ -102,9 +115,9 @@ with open(filename_result_ave, 'w', newline='') as f: #csvで平均値を保存
 #---------------------
 
 #計算に用いたデータを全てcsvで出力
-result_data_all = [["Time","Pc[MPaA]","Pt[MPaA]","Mmfr[ml/s]","Isp[sec]","F[mN]"]]
+result_data_all = [["Time","Pt[MPaA]","Pa[MPaA]","Pc[MPaA]","Tc[K]","Mmfr[ml/s]","Isp[sec]","F[mN]"]]
 for i in range(len(valve_data)):
-    result_data_all.append([x[i],chamber_pressure_data[i],chamber_temperature_data[i],flow_rate_data[i],isp_vac_data[i],thrust_data[i]])
+    result_data_all.append([x[i], supply_pressure_data[i], above_pressure_data[i], chamber_pressure_data[i],chamber_temperature_data[i],flow_rate_data[i],isp_vac_data[i],thrust_data[i]])
 with open(filename_result_all, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows(result_data_all)
