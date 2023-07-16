@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from rocketcea.cea_obj import CEA_Obj, add_new_oxidizer
 import csv
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,10 +14,13 @@ h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
 add_new_oxidizer( '60_H2O2', card_str )
 ispObj = CEA_Obj( oxName='60_H2O2', fuelName='C2H5OH')
 
+path = os.getcwd()
 filename = 'C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\01_0.6MPaA_30s\\auto$0.csv'
 filename_result_ave = 'C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\01_0.6MPaA_30s\\result_ave.csv'
 filename_result_all = 'C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\01_0.6MPaA_30s\\result_all.csv'
 #filename = '/home/haru-11/cal-prop-cea/01_0.6MPaA_30s/auto$0.csv'
+
+#csv読み込み
 with open(filename, newline='', encoding="shift-jis") as f:
     reader = csv.reader(f)
     data_csv = [row for row in reader] #data start at 62rows
@@ -26,7 +30,9 @@ header = data_csv[61]
 print(data_len)
 print(data_csv[data_len+62])
 print(header[0])
+#--------------
 
+#変数定義
 At_diameter = 1.0 #[mm]
 Interval = 100 #[Hz] サンプリング周波数
 OF_RHO = 1.24 #推進剤の密度
@@ -44,6 +50,7 @@ cf_data = []
 thrust_data = []
 isp_vac_data = []
 result_data_ave = [["No","start","end","Pc_A","Pt_A","Mmfr_A","Isp_A","F_A"]]
+#---------------
 
 #計算するデータ範囲取得
 valve_open_num = 0
@@ -106,12 +113,12 @@ with open(filename_result_all, 'w', newline='') as f:
 
 #グラフ描写
 #全体のグラフ設定
-fig1 = plt.figure(figsize=[16,9.0])
+fig1 = plt.figure(figsize=[8,4.5])
 print(x)
 print(len(x),len(chamber_pressure_data))
 #print(isp_vac_data)
 #一つ目のグラフ描写
-ax1_1 = fig1.add_subplot(2, 2, 1)
+ax1_1 = fig1.add_subplot(1, 1, 1)
 ax1_1.plot(x,chamber_pressure_data, color = "red", label = "pressure")
 #ax1_1.scatter(x,chamber_pressure_data, c=None, marker=None, linewidths=1)
 #ax1.legend(['pressure']) # 凡例の表示
@@ -139,8 +146,11 @@ h1, l1 = ax1_1.get_legend_handles_labels()
 h2, l2 = ax1_2.get_legend_handles_labels()
 ax1_1.legend(h1+h2, l1+l2)
 
+plt.savefig(path + "/fig1.png")
+plt.clf()
+
 #グラフ描写の二つ目
-ax2_1 = fig1.add_subplot(2, 2, 2)
+ax2_1 = fig1.add_subplot(1, 1, 1)
 ax2_1.plot(x,chamber_pressure_data, color = "red", label = "pressure")
 #ax1.legend(['pressure']) # 凡例の表示
 #ax.set_xlim(0, 8)  # プロットのX範囲
@@ -167,8 +177,11 @@ h1, l1 = ax2_1.get_legend_handles_labels()
 h2, l2 = ax2_2.get_legend_handles_labels()
 ax2_1.legend(h1+h2, l1+l2)
 
+plt.savefig(path + "/fig2.png")
+plt.clf()
+
 #グラフ描写の３つ目
-ax3_1 = fig1.add_subplot(2, 2, 3)
+ax3_1 = fig1.add_subplot(1, 1, 1)
 ax3_1.plot(x,cstar_data, color = "k", label = "cstar")
 #ax1.legend(['pressure']) # 凡例の表示
 #ax.set_xlim(0, 8)  # プロットのX範囲
@@ -199,9 +212,11 @@ ax3_1.legend(h1+h2, l1+l2)
 h1, l1 = ax2_1.get_legend_handles_labels()
 h2, l2 = ax2_2.get_legend_handles_labels()
 ax2_1.legend(h1+h2, l1+l2)
+plt.savefig(path + "/fig3.png")
+plt.clf()
 
 #グラフ描写の4つ目
-ax4_1 = fig1.add_subplot(2, 2, 4)
+ax4_1 = fig1.add_subplot(1, 1, 1)
 ax4_1.plot(x,thrust_data, color = "m", label = "thrust")
 #ax1.legend(['pressure']) # 凡例の表示
 #ax.set_xlim(0, 8)  # プロットのX範囲
@@ -227,7 +242,7 @@ ax4_3.axis("off")
 h1, l1 = ax4_1.get_legend_handles_labels()
 h2, l2 = ax4_2.get_legend_handles_labels()
 ax4_1.legend(h1+h2, l1+l2)
-
+plt.savefig(path + "/fig4.png")
 
 plt.show()
 #plt.savefig('result.png')
