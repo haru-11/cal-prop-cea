@@ -8,10 +8,10 @@ gg = Gen_graphs.Gen_graphs(gd)
 
 filename_data = []
 
-# 【毎回変更する】実験データが格納されているフォルダ
+# １．【毎回変更する】実験データが格納されているフォルダ
 zikken_path = "C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\解析データ"
 
-# 【毎回変更する】生成ファイルを格納するフォルダ
+# ２．【毎回変更する】生成ファイルを格納するフォルダ
 result_path = "C:\\Users\\SAHARA-7\\workspace\\cal-prop-cea\\実験結果"
 
 graph_file_extension = ".png"
@@ -31,5 +31,8 @@ for i in range(len(dirs)):
     print(" ")
     print("処理中のフォルダ：" + dirs[i])
     gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, dirs[i])
+
+    # グラフを作らない場合は，以下の関数をコメントアウトする．
     gg.gen_graphs(result_path, dirs[i], graph_file_extension)
+
     print("完了：" + dirs[i])
