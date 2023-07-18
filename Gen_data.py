@@ -1,9 +1,6 @@
-from rocketcea.cea_obj import CEA_Obj, add_new_oxidizer
+from rocketcea.cea_obj import CEA_Obj, add_new_oxidizer, add_new_propellant
 import csv
-import os
 import numpy as np
-import matplotlib.pyplot as plt
-import Gen_data
 
 card_str = """
 oxid H2O2(L) H 2 O 2  wt%=60.00
@@ -12,7 +9,17 @@ oxid = WATER H 2.0 O 1.0 wt%= 40.0
 h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
 """
 add_new_oxidizer("60_H2O2", card_str)
-ispObj = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")
+
+card_str = """
+name H2O2(L) H 2 O 2  wt%=60.00
+h,cal=-44880.0     t(k)=298.15  rho.g/cc=1.407
+oxid = WATER H 2.0 O 1.0 wt%= 40.0
+h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
+"""
+add_new_propellant("60_H2O2_mono", card_str)
+
+# ispObj = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")  # 二液
+ispObj = CEA_Obj(propName="60_H2O2_mono")  # 一液
 
 
 class Gen_data:
@@ -34,7 +41,7 @@ class Gen_data:
         print(data_csv[data_len + 62])
         # --------------
 
-        # 【毎回確認】変数定義
+        # ３．【毎回確認】変数定義
         At_diameter = 1.0  # [mm]
         Interval = 100  # [Hz] サンプリング周波数
         OF_RHO = 1.24  # 推進剤の密度
@@ -42,25 +49,14 @@ class Gen_data:
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
 
-        valve_column = 7  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
-        flow_rate_column = 5  # 流量のカラム
-        Tc_column = 6  # チャンバ温度のカラム
+        flow_rate_column = 6  # 流量のカラム
+        Tc_column = 7  # チャンバ温度のカラム
 
-        At = ((At_diameter / 2.0) * (At_diameter / 2.0)) * (np.pi)
-        self.valve_data = []
-        self.chamber_pressure_data = []
-        self.supply_pressure_data = []
-        self.above_pressure_data = []
-        self.flow_rate_data = []
-        self.chamber_temperature_data = []
-        self.cstar_data = []
-        self.cf_data = []
-        self.thrust_data = []
-        self.isp_vac_data = []
-        result_data_ave = [
+        result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
                 "No",
                 "start",
@@ -74,8 +70,19 @@ class Gen_data:
                 "F_A",
             ]
         ]
+        # ---------------------------
 
-        # ---------------
+        At = ((At_diameter / 2.0) * (At_diameter / 2.0)) * (np.pi)
+        self.valve_data = []
+        self.chamber_pressure_data = []
+        self.supply_pressure_data = []
+        self.above_pressure_data = []
+        self.flow_rate_data = []
+        self.chamber_temperature_data = []
+        self.cstar_data = []
+        self.cf_data = []
+        self.thrust_data = []
+        self.isp_vac_data = []
 
         # 計算するデータ範囲取得
         valve_open_num = 0
@@ -108,13 +115,13 @@ class Gen_data:
             pambcf = ispObj.getFrozen_PambCf(
                 Pamb=0.000001,
                 Pc=(float(data_csv[i][Pc_column]) * 145.038),
-                MR=7.4,
+                # MR=7.4,
                 eps=100.0,
                 frozenAtThroat=0,
             )
             vac_cstar_tc = ispObj.get_IvacCstrTc(
                 (float(data_csv[i][Pc_column]) * 145.038),
-                MR=7.4,
+                # MR=7.4,
                 eps=100.0,
                 frozen=1,
                 frozenAtThroat=0,
@@ -132,10 +139,7 @@ class Gen_data:
                 self.isp_vac_data.append(0.0)
             else:
                 self.isp_vac_data.append(
-                    float(data_csv[i][3])
-                    * float(pambcf[0])
-                    * At
-                    * 1000
+                    (float(data_csv[i][3]) * float(pambcf[0]) * At * 1000)
                     / (float(data_csv[i][flow_rate_column]) * OF_RHO * 9.80665)
                 )
         self.x = np.arange(
@@ -229,3 +233,18 @@ class Gen_data:
             writer = csv.writer(f)
             writer.writerows(result_data_all)
         # --------------------------
+
+
+if __name__ == "__main__":
+    str = ispObj.get_full_cea_output(
+        Pc=40.0,
+        eps=100.0,
+        MR=7.4,
+        frozen=1,
+        frozenAtThroat=0,
+        short_output=1,
+        pc_units="bar",
+        output="siunits",
+    )
+
+    print(str)

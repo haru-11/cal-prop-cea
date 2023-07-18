@@ -8,7 +8,6 @@ class Gen_graphs(Gen_data):
         super().__init__()
         print("Active generate graphs")
         self.gd = data_instance
-        print(self.x)
 
     def gen_graphs(self, path, dirs, extension):
         # グラフ描写
