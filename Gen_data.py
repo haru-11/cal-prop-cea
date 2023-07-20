@@ -18,8 +18,8 @@ h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
 """
 add_new_propellant("60_H2O2_mono", card_str)
 
-# ispObj = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")  # 二液
-ispObj = CEA_Obj(propName="60_H2O2_mono")  # 一液
+ispObj = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")  # 二液
+#ispObj = CEA_Obj(propName="60_H2O2_mono")  # 一液
 
 
 class Gen_data:
@@ -49,12 +49,12 @@ class Gen_data:
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
 
-        valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        valve_column = 7  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
-        flow_rate_column = 6  # 流量のカラム
-        Tc_column = 7  # チャンバ温度のカラム
+        flow_rate_column = 5  # 流量のカラム
+        Tc_column = 6  # チャンバ温度のカラム
 
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
@@ -115,13 +115,13 @@ class Gen_data:
             pambcf = ispObj.getFrozen_PambCf(
                 Pamb=0.000001,
                 Pc=(float(data_csv[i][Pc_column]) * 145.038),
-                # MR=7.4,
+                MR=7.4,
                 eps=100.0,
                 frozenAtThroat=0,
             )
             vac_cstar_tc = ispObj.get_IvacCstrTc(
                 (float(data_csv[i][Pc_column]) * 145.038),
-                # MR=7.4,
+                MR=7.4,
                 eps=100.0,
                 frozen=1,
                 frozenAtThroat=0,
