@@ -18,15 +18,17 @@ h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
 """
 add_new_propellant("60_H2O2_mono", card_str)
 
-ispObj = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")  # 二液
-#ispObj = CEA_Obj(propName="60_H2O2_mono")  # 一液
+ispObj_2 = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")  # 二液
+ispObj_1 = CEA_Obj(propName="60_H2O2_mono")  # 一液
 
 
 class Gen_data:
     def __init__(self):
         print("Active Generate data")
+        self.total_throughput_sum = []
+        self.chamber_pressure_ave_sum = []
 
-    def gen_data(self, filename_data, filename_result_all, filename_result_ave, dirs):
+    def gen_data(self, filename_data, filename_result_all, filename_result_ave, dirs, sel_bm):
         # csv読み込み．waveloggerの設定をいじらなければ変えなくて良い．
         with open(filename_data, newline="", encoding="shift-jis") as f:
             reader = csv.reader(f)
@@ -38,6 +40,8 @@ class Gen_data:
         print("ヘッダー", end=":")
         print(header)
         print("最初のデータ", end=":")
+        print(data_csv[62])
+        print("最後のデータ", end=":")
         print(data_csv[data_len + 62])
         # --------------
 
@@ -45,16 +49,17 @@ class Gen_data:
         At_diameter = 1.0  # [mm]
         Interval = 100  # [Hz] サンプリング周波数
         OF_RHO = 1.24  # 推進剤の密度
+        MR = 7.4
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
 
-        valve_column = 7  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
-        flow_rate_column = 5  # 流量のカラム
-        Tc_column = 6  # チャンバ温度のカラム
+        flow_rate_column = 6  # 流量のカラム
+        Tc_column = 7  # チャンバ温度のカラム
 
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
@@ -66,13 +71,20 @@ class Gen_data:
                 "Pc_A",
                 "Pt_A",
                 "Mmfr_A",
+                "Total",
+                "Sum",
+                "Cstar",
+                "Cstar_cea",
                 "Isp_A",
                 "F_A",
+                "AT", At_diameter, 
+                "O/F", MR, 
+                "RHO",OF_RHO
             ]
         ]
         # ---------------------------
 
-        At = ((At_diameter / 2.0) * (At_diameter / 2.0)) * (np.pi)
+        At = ((At_diameter / 2.0) * (At_diameter / 2.0)) * (np.pi) #[mm^2]
         self.valve_data = []
         self.chamber_pressure_data = []
         self.supply_pressure_data = []
@@ -80,9 +92,13 @@ class Gen_data:
         self.flow_rate_data = []
         self.chamber_temperature_data = []
         self.cstar_data = []
+        self.cstar_cal_data = []
+        self.cstar_effi_data = []
         self.cf_data = []
         self.thrust_data = []
         self.isp_vac_data = []
+        self.total_throughput_data = []
+        total_throughput = 0.0
 
         # 計算するデータ範囲取得
         valve_open_num = 0
@@ -101,6 +117,9 @@ class Gen_data:
                 and plt_end_num == 0
             ):
                 plt_end_num = i + 62 + (Pre_TRG * Interval)
+        on_time = (plt_end_num - plt_start_num - (Pre_TRG * Interval * 2)) / Interval
+        #on_time = (plt_end_num - plt_start_num - (Pre_TRG * Interval * 2))
+        print("valve on time[sec]:"+ str(on_time))
         # --------------------------
 
         # 各データをlistに入れる．
@@ -109,39 +128,62 @@ class Gen_data:
             self.chamber_pressure_data.append(float(data_csv[i][Pc_column]))
             self.supply_pressure_data.append(float(data_csv[i][Pt_column]))
             self.above_pressure_data.append(float(data_csv[i][Pa_column]))
-            self.flow_rate_data.append(float(data_csv[i][flow_rate_column]))
+            self.flow_rate_data.append(float(data_csv[i][flow_rate_column])*OF_RHO)
             self.chamber_temperature_data.append(float(data_csv[i][Tc_column]))
 
-            pambcf = ispObj.getFrozen_PambCf(
-                Pamb=0.000001,
-                Pc=(float(data_csv[i][Pc_column]) * 145.038),
-                MR=7.4,
-                eps=100.0,
-                frozenAtThroat=0,
-            )
-            vac_cstar_tc = ispObj.get_IvacCstrTc(
-                (float(data_csv[i][Pc_column]) * 145.038),
-                MR=7.4,
-                eps=100.0,
-                frozen=1,
-                frozenAtThroat=0,
-            )
+            if sel_bm == 2:
+                pambcf = ispObj_2.getFrozen_PambCf(
+                    Pamb=0.000001,
+                    Pc=(float(data_csv[i][Pc_column]) * 145.038),
+                    MR=MR,
+                    eps=100.0,
+                    frozenAtThroat=0,
+                )
+                vac_cstar_tc = ispObj_2.get_IvacCstrTc(
+                    (float(data_csv[i][Pc_column]) * 145.038),
+                    MR=MR,
+                    eps=100.0,
+                    frozen=1,
+                    frozenAtThroat=0,
+                )
+            elif sel_bm == 1:
+                vac_cstar_tc = ispObj_1.get_IvacCstrTc(
+                    (float(data_csv[i][Pc_column]) * 145.038),
+                    eps=100.0,
+                    frozen=0,
+                    frozenAtThroat=0,
+                )
+                pambcf = ispObj_1.get_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column]) * 145.038), eps=100.0)
+            else:
+                print("select MR(O/F) error")
+
             self.cstar_data.append(float(vac_cstar_tc[1]) * 0.3048)
             self.cf_data.append(float(pambcf[0]))
             self.thrust_data.append(
-                float(data_csv[i][Pc_column]) * float(pambcf[0]) * At * 1000
+            float(data_csv[i][Pc_column]) * float(pambcf[0]) * At * 1000
             )
-            if (
+
+            if (    #流量はバルブオン以外は0とする．
                 i < (plt_start_num + (Pre_TRG * Interval))
                 or i > (plt_end_num - (Pre_TRG * Interval))
                 or (float(data_csv[i][flow_rate_column]) == 0.0)
             ):
                 self.isp_vac_data.append(0.0)
+                self.cstar_cal_data.append(0.0)
             else:
                 self.isp_vac_data.append(
-                    (float(data_csv[i][3]) * float(pambcf[0]) * At * 1000)
-                    / (float(data_csv[i][flow_rate_column]) * OF_RHO * 9.80665)
+                    (self.thrust_data[i-plt_start_num])
+                    / (self.flow_rate_data[i-plt_start_num] * 9.80665)
                 )
+                self.cstar_cal_data.append(
+                    self.chamber_pressure_data[i-plt_start_num]*At
+                    / (self.flow_rate_data[i-plt_start_num]/1000)
+                )
+
+            total_throughput = total_throughput + self.flow_rate_data[i-plt_start_num]*(1.0/Interval)
+            self.total_throughput_data.append(total_throughput)
+            self.cstar_effi_data.append(self.cstar_cal_data[i-plt_start_num]/self.cstar_data[i-plt_start_num])
+
         self.x = np.arange(
             (0 - Pre_TRG), len(self.valve_data) / Interval - Pre_TRG, 1 / Interval
         )  # バルブデータから時間を生成
@@ -173,9 +215,22 @@ class Gen_data:
         isp_vac_ave = sum(self.isp_vac_data[Static_start_num:Static_end_num]) / len(
             self.isp_vac_data[Static_start_num:Static_end_num]
         )
+        cstar_ave = sum(self.cstar_cal_data[Static_start_num:Static_end_num]) / len(
+            self.cstar_cal_data[Static_start_num:Static_end_num]
+        )
+        cstar_cea_ave = sum(self.cstar_data[Static_start_num:Static_end_num]) / len(
+            self.cstar_data[Static_start_num:Static_end_num]
+        )
         thrust_ave = sum(self.thrust_data[Static_start_num:Static_end_num]) / len(
             self.thrust_data[Static_start_num:Static_end_num]
         )
+        
+        if len(self.total_throughput_sum) == 0:
+            _tt = total_throughput
+        else:
+            _tt = self.total_throughput_sum[len(self.total_throughput_sum)-1] + total_throughput
+        self.total_throughput_sum.append(_tt)
+        self.chamber_pressure_ave_sum.append(chamber_pressure_ave)
 
         result_data_ave.append(
             [
@@ -187,6 +242,10 @@ class Gen_data:
                 chamber_pressure_ave,
                 chamber_temperature_ave,
                 flow_rate_ave,
+                total_throughput,
+                self.total_throughput_sum[len(self.total_throughput_sum)-1],
+                cstar_ave,
+                cstar_cea_ave,
                 isp_vac_ave,
                 thrust_ave,
             ]
@@ -211,9 +270,17 @@ class Gen_data:
                 "Pa[MPaA]",
                 "Pc[MPaA]",
                 "Tc[K]",
-                "Mmfr[ml/s]",
+                "Mmfr[g/s]",
+                "Total[g]",
+                "Cf[-]",
+                "Cstar_CEA[sec]",
+                "Cater_cal[sec]",
+                "Cstar_effi[-]",
                 "Isp[sec]",
                 "F[mN]",
+                "AT", At_diameter, 
+                "O/F", MR,
+                "RHO",OF_RHO
             ]
         ]
         for i in range(len(self.valve_data)):
@@ -225,8 +292,13 @@ class Gen_data:
                     self.chamber_pressure_data[i],
                     self.chamber_temperature_data[i],
                     self.flow_rate_data[i],
+                    self.total_throughput_data[i],
+                    self.cf_data[i],
+                    self.cstar_data[i],
+                    self.cstar_cal_data[i],
+                    self.cstar_effi_data[i],
                     self.isp_vac_data[i],
-                    self.thrust_data[i],
+                    self.thrust_data[i]
                 ]
             )
         with open(filename_result_all + "_" + dirs + ".csv", "w", newline="") as f:
