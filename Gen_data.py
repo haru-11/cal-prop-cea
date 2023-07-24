@@ -69,12 +69,13 @@ class Gen_data:
                 "Pt_A",
                 "Pa_A",
                 "Pc_A",
-                "Pt_A",
+                "Tc_A",
                 "Mmfr_A",
                 "Total",
                 "Sum",
                 "Cstar",
                 "Cstar_cea",
+                "Cstar_effi",
                 "Isp_A",
                 "F_A",
                 "AT", At_diameter, 
@@ -221,6 +222,7 @@ class Gen_data:
         cstar_cea_ave = sum(self.cstar_data[Static_start_num:Static_end_num]) / len(
             self.cstar_data[Static_start_num:Static_end_num]
         )
+        cstar_effi_ave = cstar_ave / cstar_cea_ave
         thrust_ave = sum(self.thrust_data[Static_start_num:Static_end_num]) / len(
             self.thrust_data[Static_start_num:Static_end_num]
         )
@@ -246,6 +248,7 @@ class Gen_data:
                 self.total_throughput_sum[len(self.total_throughput_sum)-1],
                 cstar_ave,
                 cstar_cea_ave,
+                cstar_effi_ave,
                 isp_vac_ave,
                 thrust_ave,
             ]

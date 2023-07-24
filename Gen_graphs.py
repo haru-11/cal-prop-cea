@@ -138,6 +138,63 @@ class Gen_graphs(Gen_data):
         print(data_len)
         print(header)
 
+        data_head_num = 1
+        data_end_num = data_len - 1
+
+        Pc_A_column = 5
+        Mmfr_A_column = 7
+        Sum_column = 9
+        Cstar_effi_column = 12
+
+        Pc_A_data = []
+        Mmfr_A_data = []
+        Sum_data = []
+        Cstar_effi_data = []
+
+        for i in range(data_head_num, data_end_num):
+            Pc_A_data.append(float(data_csv[i][Pc_A_column]))
+            Mmfr_A_data.append(float(data_csv[i][Mmfr_A_column]))
+            Sum_data.append(float(data_csv[i][Sum_column]))
+            Cstar_effi_data.append(float(data_csv[i][Cstar_effi_column]))
+        ex_num = np.arange(data_len - 1)
+        
+        gg.ave_graph(path, "Pc_vs_Total" ,Sum_data,"total[g]",Pc_A_data,"Chamber pressure[MPaA]", "Pc", (0,0.6),"red", 'o')
+        gg.ave_graph(path, "Cstar_vs_Total" ,Sum_data,"total[g]",Cstar_effi_data,"Cstar[m/s]", "Cstar", (0,1.2),"k", 'None')
+        gg.ave_graph_2(path,"Pc_and_Cstar_vs_total", Sum_data, "total[g]", Pc_A_data, "Chamber pressure[MPaA]", "Pc", (0,0.6), "red", 'o', Cstar_effi_data, "Cstar[m/s]", "Cstar", (0,1.2),"k", 'o')
+        
+    def ave_graph(self,path,filename, x_data, x_label, y_data, y_label, y_legend, y_lim, color, marker):
+        fig = plt.figure(figsize=[8, 4.5])
+        ax = fig.add_subplot(1, 1, 1)
+        ax.plot(x_data, y_data, marker=marker, color=color, label=y_legend)
+        ax.set_xlim(0,350)
+        ax.set_ylim(y_lim)  # プロットのY範囲
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        plt.savefig(path + "\\" + filename + ".png")
+        #plt.show()
+        plt.clf()
+
+    def ave_graph_2(self,path,filename, x_data, x_label, y_data, y_label, y_legend, y_lim, color, marker, y_data2, y_label2, y_legend2, y_lim2, color2, marker2):
+        fig = plt.figure(figsize=[8, 4.5])
+        ax = fig.add_subplot(1, 1, 1)
+        ax.plot(x_data, y_data, marker=marker, color=color, label=y_legend)
+        ax.set_xlim(0,350)
+        ax.set_ylim(y_lim)  # プロットのY範囲
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+
+        ax_2 = ax.twinx()
+        ax_2.plot(x_data, y_data2, marker=marker2, color=color2, label=y_legend2)
+        ax_2.set_ylim(y_lim2)
+        ax_2.set_ylabel(y_label2)
+
+        h1, l1 = ax.get_legend_handles_labels()
+        h2, l2 = ax_2.get_legend_handles_labels()
+        ax.legend(h1 + h2, l1 + l2)
+        plt.savefig(path + "\\" + filename + ".png")
+        #plt.show()
+        plt.clf()
+
 if __name__ == "__main__":
     from Gen_data import Gen_data
     import csv
