@@ -1,8 +1,9 @@
 # cal-prop-cea
-propulsion performance calcuration using NASA-CEA
+propulsion performance calcuration using NASA-CEA  
 
 ## 概要
-NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEAを使って実験データからグラフが出せるようにする。
+NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEAを使って実験データからグラフが出せるようにする。  
+現在のところ，キーエンスのwaveloggerから吐き出されるcsvファイルのみ対応している．
 
 ## 導入方法
 以下のモジュールを使って環境を構築した。
@@ -32,11 +33,14 @@ NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEA
   https://tenshoku-miti.com/takepon/windows-vscode-ternimal-ubuntu/
   https://qiita.com/setonao/items/28749762c0bc1fbbf502
 
-## 使用方法  
+## 使用方法（データ整理と時系列グラフ出力）  
 - `main.py`の１と２のパスを設定する．  
 - `Gen_data`の3の変数を確認し，必要があれば変更する．WAVELOGGERで取得するデータ数やデータの種類によって変わる．  
-- `Gen_graph`で作りたいグラフの設定を行う．よく使うであろうグラフはあらかじめ出力するようになっている．  
-- 'main.py'を実行
+- `Gen_graphs`で作りたいグラフの設定を行う．よく使うであろうグラフはあらかじめ出力するようになっている．  
+- `python main.py`のコマンドを実行  
+## 使用方法（result_ave.csvファイルから，累計推進剤使用量のグラフ出力）
+- `Gen_graphs`の下の方の関数をいい感じにいじるとcsvから横軸が累計推進剤使用量のグラフが作れる．  
+- 実行は`python Gen_graphs.py`
 
 ## 生成物  
 - 各種グラフ  
