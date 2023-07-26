@@ -48,11 +48,13 @@ class Gen_data:
         # ３．【毎回確認】変数定義
         At_diameter = 1.0  # [mm]
         Interval = 100  # [Hz] サンプリング周波数
-        OF_RHO = 1.24  # 推進剤の密度
-        MR = 7.4
+        O_RHO = 1.24       #60%H2O2の場合は1.24，水の場合は1.00
+        F_RHO = 0.79       #エタノールの場合は0.79，水の場合は1.00
+        MR = 0.0        #OFを入力．一液の場合は0を記入
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
+        moving_average_num = 1 #移動平均の個数
 
         valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
@@ -60,6 +62,13 @@ class Gen_data:
         Pa_column = 4  # 直上圧力のカラム
         flow_rate_column = 6  # 流量のカラム
         Tc_column = 7  # チャンバ温度のカラム
+
+        if MR > 0:
+            OF_RHO = (O_RHO * F_RHO) * (1 + MR)/(O_RHO + F_RHO * MR)
+        elif MR == 0:
+            OF_RHO = 1.24  # 推進剤の密度
+        else:
+            print("O/F ERROR")
 
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
@@ -94,7 +103,9 @@ class Gen_data:
         self.chamber_temperature_data = []
         self.cstar_data = []
         self.cstar_cal_data = []
+        self.cstar_cal_ma_data = []
         self.cstar_effi_data = []
+        self.cstar_effi_ma_data = []
         self.cf_data = []
         self.thrust_data = []
         self.isp_vac_data = []
@@ -187,7 +198,12 @@ class Gen_data:
 
         self.x = np.arange(
             (0 - Pre_TRG), len(self.valve_data) / Interval - Pre_TRG, 1 / Interval
-        )  # バルブデータから時間を生成
+        )  # バルブデータから時間を生  
+
+        self.cstar_cal_ma_data = self.moving_ave(self.cstar_cal_data, moving_average_num) #移動平均を出す
+        for i in range(len(self.x)):
+            self.cstar_effi_ma_data.append(self.cstar_cal_ma_data[i] / self.cstar_data[i])
+        
         # ------------------------------
 
         # 定常区間の平均値を取得
@@ -309,6 +325,27 @@ class Gen_data:
             writer.writerows(result_data_all)
         # --------------------------
 
+    def moving_ave(self, data_list, moving_average_num):
+            #cstarの移動平均を求めてる．
+            _data = []
+            _d = np.array(data_list)
+            _e = np.convolve(_d, np.ones(moving_average_num)/moving_average_num, mode='valid')
+            _f = _e.tolist()
+            if (moving_average_num) % 2 == 1:
+                for i in range((moving_average_num-1)//2):
+                    _data.append(data_list[i])
+                for i in range(len(_f)):
+                    _data.append(_f[i])
+                for i in range(len(_data)-1, len(_data)-1 + ((moving_average_num-1)//2)):
+                    _data.append(data_list[i])
+            else:
+                for i in range((moving_average_num)//2):
+                    _data.append(data_list[i])
+                for i in range(len(_f)):
+                    _data.append(_f[i])
+                for i in range(len(_data)-1 , len(_data) - 1 + ((moving_average_num-1)//2)):
+                    _data.append(data_list[i])
+            return _data
 
 if __name__ == "__main__":
     str = ispObj.get_full_cea_output(
