@@ -11,7 +11,7 @@ class Gen_graphs(Gen_data):
         self.gd = data_instance
 
     def gen_graphs(self, path, dirs, extension):
-        # グラフ描写
+        # ５．グラフのy軸範囲や要素などを確認
         # 全体のグラフ設定
         
         fig1 = plt.figure(figsize=[10.0, 7.5])
@@ -21,7 +21,7 @@ class Gen_graphs(Gen_data):
         ax1_1.plot(
             self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
         )
-        ax1_1.set_ylim(0, 0.7)  # プロットのY範囲
+        ax1_1.set_ylim(0, 0.5)  # プロットのY範囲
         ax1_1.set_xlabel("Time[sec]")
         ax1_1.set_ylabel("Camber pressure[MPaA]")
         ax1_1.grid(color='k', linestyle=':', linewidth=0.3)
@@ -30,7 +30,7 @@ class Gen_graphs(Gen_data):
         ax1_2.plot(
             self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp"
         )
-        ax1_2.set_ylim(0, 200)  # プロットのY範囲
+        ax1_2.set_ylim(0, 1000)  # プロットのY範囲
         ax1_2.set_ylabel("Camber temperature[℃]")
 
         ax1_3 = ax1_1.twinx()
@@ -50,14 +50,14 @@ class Gen_graphs(Gen_data):
         ax2_1.plot(
             self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
         )
-        ax2_1.set_ylim(0, 0.7)  # プロットのY範囲
+        ax2_1.set_ylim(0, 0.5)  # プロットのY範囲
         ax2_1.set_xlabel("time[sec]")
         ax2_1.set_ylabel("camber pressure[MPaA]")
         ax2_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         ax2_2 = ax2_1.twinx()
         ax2_2.plot(self.gd.x, self.gd.flow_rate_data, color="c", label="flow_rate")
-        ax2_2.set_ylim(0, 2.0)  # プロットのY範囲
+        ax2_2.set_ylim(0, 1.0)  # プロットのY範囲
         ax2_2.set_ylabel("flow rate[ml/s]")
 
         ax2_3 = ax2_1.twinx()
@@ -75,7 +75,7 @@ class Gen_graphs(Gen_data):
 
         # グラフ描写の３つ目
         ax3_1 = fig1.add_subplot(1, 1, 1)
-        ax3_1.plot(self.gd.x, self.gd.thrust_data, color="k", label="thrust")
+        ax3_1.plot(self.gd.x, self.gd.thrust_data, color="m", label="thrust")
         #ax3_1.plot(self.gd.x, self.gd.cstar_data, color="k", label="cstar(CEA)")
         #ax3_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
         ax3_1.set_ylim(0, 1000)  # プロットのY範囲
@@ -83,14 +83,14 @@ class Gen_graphs(Gen_data):
         ax3_1.set_ylabel("Thrust[N]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
 
-        '''
+        
         ax3_2 = ax3_1.twinx()
-        ax3_2.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
+        ax3_2.plot(self.gd.x, self.gd.cf_act_data, color="k", label="Cf_act")
         #ax3_2.plot(self.gd.x, self.gd.chamber_pressure_data, color="r", label="Pc")
-        ax3_2.set_ylim(0.0, 0.6)  # プロットのY範囲
-        ax3_2.set_ylabel("Cstar[m/s]")
+        #ax3_2.set_ylim(0.0, 0.6)  # プロットのY範囲
+        ax3_2.set_ylabel("Cf_act[-]")
         #ax3_2.set_ylabel("canber pressure[MPaA]")
-        '''
+        
 
         ax3_3 = ax3_1.twinx()
         ax3_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
@@ -98,9 +98,9 @@ class Gen_graphs(Gen_data):
         ax3_3.axis("off")
 
         # 凡例
-        #h1, l1 = ax3_1.get_legend_handles_labels()
-        #h2, l2 = ax3_2.get_legend_handles_labels()
-        #ax3_1.legend(h1 + h2, l1 + l2)
+        h1, l1 = ax3_1.get_legend_handles_labels()
+        h2, l2 = ax3_2.get_legend_handles_labels()
+        ax3_1.legend(h1 + h2, l1 + l2)
 
         # 凡例
         h1, l1 = ax2_1.get_legend_handles_labels()
@@ -112,7 +112,7 @@ class Gen_graphs(Gen_data):
         # グラフ描写の4つ目
         ax4_1 = fig1.add_subplot(1, 1, 1)
         ax4_1.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="m", label="cstar")
-        ax4_1.set_ylim(0, 2000)  # プロットのY範囲
+        ax4_1.set_ylim(0, 4000)  # プロットのY範囲
         ax4_1.set_xlabel("Time[s]")
         ax4_1.set_ylabel("Characteristic exhaust velocity[m/s]")
         ax4_1.grid(color='k', linestyle=':', linewidth=0.3)
@@ -155,7 +155,7 @@ class Gen_graphs(Gen_data):
         Pc_A_column = 5
         Mmfr_A_column = 7
         Sum_column = 9
-        Cstar_effi_column = 12
+        Cstar_effi_column = 14
 
         Pc_A_data = []
         Mmfr_A_data = []
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     gg = Gen_graphs(gd)
 
     # ２．【毎回変更する】生成ファイルを格納するフォルダ
-    result_path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2022実験\\220524_前処理触媒_1液\\解析結果_新解析ソフト"
+    result_path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2022実験\\220524_前処理触媒_1液\\解析結果_新解析ソフト3"
 
     # 一液式の場合は１を，二液式の場合は２を入れる．
     graph_file_extension = ".png"

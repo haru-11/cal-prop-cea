@@ -1,3 +1,4 @@
+from math import cos
 from rocketcea.cea_obj import CEA_Obj, add_new_oxidizer, add_new_propellant
 import csv
 import numpy as np
@@ -45,23 +46,25 @@ class Gen_data:
         print(data_csv[data_len + 62])
         # --------------
 
-        # ３．【毎回確認】変数定義
-        At_diameter = 1.0  # [mm]
+        # ４．【毎回確認】変数定義
+        At_diameter = 0.54  # [mm]
+        Nozzle_cone_half_ang = 15 #ノズルコーン半頂角,Θ
+        Thrust_coefficient_effi = 0.983 #推力係数効率
         Interval = 100  # [Hz] サンプリング周波数
         O_RHO = 1.24       #60%H2O2の場合は1.24，水の場合は1.00
         F_RHO = 0.79       #エタノールの場合は0.79，水の場合は1.00
-        MR = 0.0        #OFを入力．一液の場合は0を記入
+        MR = 7.4      #OFを入力．一液の場合は0を記入
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
-        moving_average_num = 1 #移動平均の個数
+        moving_average_num = 10 #移動平均の個数
 
-        valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        valve_column = 8  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
-        flow_rate_column = 6  # 流量のカラム
-        Tc_column = 7  # チャンバ温度のカラム
+        flow_rate_column = 5  # 流量のカラム
+        Tc_column = 6  # チャンバ温度のカラム
 
         if MR > 0:
             OF_RHO = (O_RHO * F_RHO) * (1 + MR)/(O_RHO + F_RHO * MR)
@@ -69,6 +72,8 @@ class Gen_data:
             OF_RHO = 1.24  # 推進剤の密度
         else:
             print("O/F ERROR")
+        nozzle_factor = 0.5*(1+ cos(Nozzle_cone_half_ang/180*3.141592)) #ノズル修正係数の計算
+
 
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
@@ -82,6 +87,8 @@ class Gen_data:
                 "Mmfr_A",
                 "Total",
                 "Sum",
+                "Cf_cea",
+                "Cf_act",
                 "Cstar",
                 "Cstar_cea",
                 "Cstar_effi",
@@ -89,7 +96,8 @@ class Gen_data:
                 "F_A",
                 "AT", At_diameter, 
                 "O/F", MR, 
-                "RHO",OF_RHO
+                "RHO",OF_RHO,
+                "Slect B/M", sel_bm
             ]
         ]
         # ---------------------------
@@ -106,7 +114,8 @@ class Gen_data:
         self.cstar_cal_ma_data = []
         self.cstar_effi_data = []
         self.cstar_effi_ma_data = []
-        self.cf_data = []
+        self.cf_cea_data = []
+        self.cf_act_data = []
         self.thrust_data = []
         self.isp_vac_data = []
         self.total_throughput_data = []
@@ -170,9 +179,10 @@ class Gen_data:
                 print("select MR(O/F) error")
 
             self.cstar_data.append(float(vac_cstar_tc[1]) * 0.3048)
-            self.cf_data.append(float(pambcf[0]))
+            self.cf_cea_data.append(float(pambcf[0]))
+            self.cf_act_data.append(float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi)
             self.thrust_data.append(
-            float(data_csv[i][Pc_column]) * float(pambcf[0]) * At * 1000
+            float(data_csv[i][Pc_column]) * float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi * At * 1000
             )
 
             if (    #流量はバルブオン以外は0とする．
@@ -242,6 +252,12 @@ class Gen_data:
         thrust_ave = sum(self.thrust_data[Static_start_num:Static_end_num]) / len(
             self.thrust_data[Static_start_num:Static_end_num]
         )
+        cf_act_ave = sum(self.cf_act_data[Static_start_num:Static_end_num]) / len(
+            self.cf_act_data[Static_start_num:Static_end_num]
+        )
+        cf_cea_ave = sum(self.cf_cea_data[Static_start_num:Static_end_num]) / len(
+            self.cf_cea_data[Static_start_num:Static_end_num]
+        )
         
         if len(self.total_throughput_sum) == 0:
             _tt = total_throughput
@@ -262,6 +278,8 @@ class Gen_data:
                 flow_rate_ave,
                 total_throughput,
                 self.total_throughput_sum[len(self.total_throughput_sum)-1],
+                cf_cea_ave,
+                cf_act_ave,
                 cstar_ave,
                 cstar_cea_ave,
                 cstar_effi_ave,
@@ -291,7 +309,8 @@ class Gen_data:
                 "Tc[K]",
                 "Mmfr[g/s]",
                 "Total[g]",
-                "Cf[-]",
+                "Cf_cea[-]",
+                "Cf_act[-]",
                 "Cstar_CEA[sec]",
                 "Cater_cal[sec]",
                 "Cstar_effi[-]",
@@ -299,7 +318,8 @@ class Gen_data:
                 "F[mN]",
                 "AT", At_diameter, 
                 "O/F", MR,
-                "RHO",OF_RHO
+                "RHO",OF_RHO,
+                "selct B/M", sel_bm
             ]
         ]
         for i in range(len(self.valve_data)):
@@ -312,7 +332,8 @@ class Gen_data:
                     self.chamber_temperature_data[i],
                     self.flow_rate_data[i],
                     self.total_throughput_data[i],
-                    self.cf_data[i],
+                    self.cf_cea_data[i],
+                    self.cf_act_data[i],
                     self.cstar_data[i],
                     self.cstar_cal_data[i],
                     self.cstar_effi_data[i],

@@ -30,24 +30,25 @@ class GenGraph:
             _d, _t = ggc.gen_dataset(path_list[j],data_column)
             dataset.append(_d)
             timeset.append(_t)
-            print(path_list[j])
+            #print(path_list[j])
 
-        cmap = plt.get_cmap("spring")
+        cmap = plt.get_cmap("plasma")
         fig = plt.figure(figsize=[10, 7.5])
         ax = fig.add_subplot(1, 1, 1)
         #ax.plot(timeset[0], dataset[0] , marker=None, color='k')
-        for i in range(len(dataset)):
+        for i in range(len(dataset)-1,0,-1):
             ind = i / len(dataset)
             ax.plot(timeset[i], dataset[i] , marker=None, color=cmap(ind))
-        ax.set_xlim(-2.5,17.5)
-        #ax.set_ylim(0,200)  # プロットのY範囲
+        #ax.set_xlim(-2.5,17.5)
+        ax.set_ylim(0,1.6)  # プロットのY範囲
         ax.set_xlabel("time")
         ax.set_ylabel(data_header[data_column])
         ax.grid(color='k', linestyle=':', linewidth=0.3)
+        
         print(path + "\\series_"+ ggc.element_name + ".png")
         plt.savefig(path + "\\series_"+ ggc.element_name + ".png")
         #plt.show()
-        #plt.clf()
+        plt.clf()
         #plt.close()
 
 
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 
     # グラフ化するcsvファイル名のリストを取得
     path_list = []
-    path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2022実験\\220524_前処理触媒_1液\\解析結果_新解析ソフト"
+    path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\M2\\FY2022実験\\220928_1U推力測定_スラストスタンド_2液\\解析結果_新解析ソフト"
     ls = os.listdir(path)
 
     for i in ls:
@@ -76,15 +77,16 @@ if __name__ == "__main__":
         "Pa[MPaA]",
         "Pc[MPaA]",
         "Tc[K]",
-        "Mmfr[g per s]",
+        "Mmfr[g_per_s]",
         "Total[g]",
-        "Cf[-]",
+        "Cf_cea[-]",
+        "Cf_act[-]",
         "Cstar_CEA[sec]",
         "Cater_cal[sec]",
         "Cstar_effi[-]",
         "Isp[sec]",
-        "F[mN]"
+        "F[mN]",
     ]
     #data_column = 12
     #ggc.all_gen()
-    ggc.single_gen(3)
+    ggc.single_gen(11)
