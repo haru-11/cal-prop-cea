@@ -16,7 +16,7 @@ class Gen_graphs(Gen_data):
         
         fig1 = plt.figure(figsize=[10.0, 7.5])
         plt.rcParams["font.size"] = 17
-        # 一つ目のグラフ描写
+        # グラフ描写の１つ目
         ax1_1 = fig1.add_subplot(1, 1, 1)
         ax1_1.plot(
             self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
