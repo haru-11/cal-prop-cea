@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+##ブランチテスト
 import os
 import Gen_data
 import Gen_graphs
@@ -11,13 +12,13 @@ g_gif = gen_gif.Gen_gif()
 filename_data = []
 
 # １．【毎回変更する】実験データが格納されているフォルダ
-zikken_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M2\\FY2022実験\\220928_1U推力測定_スラストスタンド_2液\\予熱150℃_RL47000_2液_1"
+zikken_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M1研究\\FY2021実験\\211201_NM-12_一液式_ワイヤーカット影響確認試験\\解析データ"
 
 # ２．【毎回変更する】生成ファイルを格納するフォルダ
-result_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\M2\\FY2022実験\\220928_1U推力測定_スラストスタンド_2液\\解析結果_新解析ソフト"
+result_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M1研究\\FY2021実験\\211201_NM-12_一液式_ワイヤーカット影響確認試験\\解析結果_新解析ソフト2"
 
 # ３．一液式の場合は１を，二液式の場合は２を入れる．
-sel_bm = 2
+sel_bm = 1
 
 graph_file_extension = ".png"
 filename_result_ave = result_path + "\\result_ave.csv"
