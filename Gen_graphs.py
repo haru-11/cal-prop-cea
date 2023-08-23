@@ -80,7 +80,7 @@ class Gen_graphs(Gen_data):
         #ax3_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
         ax3_1.set_ylim(0, 1000)  # プロットのY範囲
         ax3_1.set_xlabel("time[sec]")
-        ax3_1.set_ylabel("Thrust[N]")
+        ax3_1.set_ylabel("Thrust[mN]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         
