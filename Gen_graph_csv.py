@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import os
 import csv
 
-
 class GenGraph:
     def __init__(self):
         print("Hello world!")
