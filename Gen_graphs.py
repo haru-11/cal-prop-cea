@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from Gen_data import Gen_data
 import csv
 
+#確認用
 
 class Gen_graphs(Gen_data):
     def __init__(self, data_instance):
