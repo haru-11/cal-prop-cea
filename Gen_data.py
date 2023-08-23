@@ -367,17 +367,3 @@ class Gen_data:
                 for i in range(len(_data)-1 , len(_data) - 1 + ((moving_average_num-1)//2)):
                     _data.append(data_list[i])
             return _data
-
-if __name__ == "__main__":
-    str = ispObj.get_full_cea_output(
-        Pc=40.0,
-        eps=100.0,
-        MR=7.4,
-        frozen=1,
-        frozenAtThroat=0,
-        short_output=1,
-        pc_units="bar",
-        output="siunits",
-    )
-
-    print(str)
