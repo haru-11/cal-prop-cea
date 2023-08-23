@@ -45,7 +45,7 @@ class Gen_graphs(Gen_data):
         plt.savefig(path + "\\" + dirs + "_fig1" + extension)
         plt.clf()
 
-        # グラフ描写の二つ目
+        # グラフ描写の２つ目
         ax2_1 = fig1.add_subplot(1, 1, 1)
         ax2_1.plot(
             self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
@@ -80,7 +80,7 @@ class Gen_graphs(Gen_data):
         #ax3_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
         ax3_1.set_ylim(0, 1000)  # プロットのY範囲
         ax3_1.set_xlabel("time[sec]")
-        ax3_1.set_ylabel("Thrust[N]")
+        ax3_1.set_ylabel("Thrust[mN]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         
