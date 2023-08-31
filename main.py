@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+##ブランチテスト
 import os
 import Gen_data
 import Gen_graphs
@@ -11,10 +12,17 @@ g_gif = gen_gif.Gen_gif()
 filename_data = []
 
 # １．【毎回変更する】実験データが格納されているフォルダ
+<<<<<<< HEAD
 zikken_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M2\\FY2022実験\\220524_前処理触媒_1液\\解析データ"
 
 # ２．【毎回変更する】生成ファイルを格納するフォルダ
 result_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M2\\FY2022実験\\220524_前処理触媒_1液\\解析結果_新解析ソフト4"
+=======
+zikken_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M1研究\\FY2021実験\\211201_NM-12_一液式_ワイヤーカット影響確認試験\\解析データ"
+
+# ２．【毎回変更する】生成ファイルを格納するフォルダ
+result_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M1研究\\FY2021実験\\211201_NM-12_一液式_ワイヤーカット影響確認試験\\解析結果_新解析ソフト2"
+>>>>>>> origin/main
 
 # ３．一液式の場合は１を，二液式の場合は２を入れる．
 sel_bm = 1

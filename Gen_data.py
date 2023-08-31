@@ -47,24 +47,24 @@ class Gen_data:
         # --------------
 
         # ４．【毎回確認】変数定義
-        At_diameter = 0.54  # [mm]
+        At_diameter = 1.0  # [mm]
         Nozzle_cone_half_ang = 15 #ノズルコーン半頂角,Θ
         Thrust_coefficient_effi = 0.983 #推力係数効率
         Interval = 100  # [Hz] サンプリング周波数
         O_RHO = 1.24       #60%H2O2の場合は1.24，水の場合は1.00
         F_RHO = 0.79       #エタノールの場合は0.79，水の場合は1.00
-        MR = 7.4      #OFを入力．一液の場合は0を記入
+        MR = 0.0     #OFを入力．一液の場合は0を記入
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
-        moving_average_num = 10 #移動平均の個数
+        moving_average_num = 1 #移動平均の個数
 
-        valve_column = 8  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
-        flow_rate_column = 5  # 流量のカラム
-        Tc_column = 6  # チャンバ温度のカラム
+        flow_rate_column = 6  # 流量のカラム
+        Tc_column = 7  # チャンバ温度のカラム
 
         if MR > 0:
             OF_RHO = (O_RHO * F_RHO) * (1 + MR)/(O_RHO + F_RHO * MR)
@@ -175,9 +175,11 @@ class Gen_data:
                     frozenAtThroat=0,
                 )
                 pambcf = ispObj_1.get_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column]) * 145.038), eps=100.0)
+                #pambcf = ispObj_1.getFrozen_PambCf(Pamb=14.7 , Pc=(float(data_csv[i][Pc_column]) * 145.038), eps=100.0, frozenAtThroat=0)
             else:
                 print("select MR(O/F) error")
 
+            print(str(i)+",cf:"+str(pambcf[0])+","+str(vac_cstar_tc))
             self.cstar_data.append(float(vac_cstar_tc[1]) * 0.3048)
             self.cf_cea_data.append(float(pambcf[0]))
             self.cf_act_data.append(float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi)
