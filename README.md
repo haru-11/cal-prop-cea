@@ -12,26 +12,32 @@ NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEA
   pythonは3.9  
   WSLでUbuntuを入れるのが最も簡単説ある．.  
 - **Rocket CEA**  
-  1. まず、gfortranコンパイラを入れる。以下サイトを参考にするが、**RocketCEAの導入**は行わない。  
-  https://makkiblog.com/rocketcea_intro/  
-  https://rocketcea.readthedocs.io/en/latest/installgfortran.html#link-installgfortran
-  2. 次に、公式ドキュメントのクイックスタートの**Anaconda Windows Batch File**を見ながら諸々のモジュールのインストールを行う。  
-  https://rocketcea.readthedocs.io/en/latest/quickstart.html  
-  たぶんエラーが起こるので、以下のサイトを参考に対処する。  
-  https://qiita.com/ina111/items/4e09711b9121db90dbaa  
-  https://github.com/sonofeft/RocketCEA/issues/11  
-  https://visualstudio.microsoft.com/ja/visual-cpp-build-tools/  
-  私は諸々エラーが出て公式クイックスタートの通りにできなかったので、optionなしの`pip install rocketcea`で入れた。そうすると、[こちら](https://github.com/sonofeft/RocketCEA/issues/11#issuecomment-665428405)のエラーがでたので、コメントを参考に \.libs フォルダにある .dll ファイルをrocketceaフォルダ直下に移動することで解決した。
-  3. **動作確認**  
+  1. まず、gfortranコンパイラを入れる。以下サイトを参考にするが、**RocketCEAの導入**は行わない。
+     - https://makkiblog.com/rocketcea_intro/
+     - https://rocketcea.readthedocs.io/en/latest/installgfortran.html#link-installgfortran
+  2. 次に、公式ドキュメントのクイックスタートの**Anaconda Windows Batch File**を見ながら諸々のモジュールのインストールを行う。
+     - https://rocketcea.readthedocs.io/en/latest/quickstart.html  
+  3. たぶんエラーが起こるので、以下のサイトを参考に対処する。
+     - https://qiita.com/ina111/items/4e09711b9121db90dbaa
+     - https://github.com/sonofeft/RocketCEA/issues/11
+     - https://visualstudio.microsoft.com/ja/visual-cpp-build-tools/
+  4. 私は諸々エラーが出て公式クイックスタートの通りにできなかったので、optionなしの`pip install rocketcea`で入れた。そうすると、[こちら](https://github.com/sonofeft/RocketCEA/issues/11#issuecomment-665428405)のエラーがでたので、コメントを参考に \.libs フォルダにある .dll ファイルをrocketceaフォルダ直下に移動することで解決した。
+  5. **動作確認**  
   `python -c "from rocketcea.cea_obj import CEA_Obj; C=CEA_Obj(oxName='LOX', fuelName='LH2'); print(C.get_Isp())"`
   と打って、`374.30361765576265`と出ればOK
-- **Git hub**  
-- **Visual Studio Code**  
-- Windows WSLにrocketceaを導入するときに参考にしたサイト  
-  https://learn.microsoft.com/ja-jp/windows/wsl/install
-  https://rocketcea.readthedocs.io/en/latest/quickstart.html#windows-10-with-wsl
-  https://tenshoku-miti.com/takepon/windows-vscode-ternimal-ubuntu/
-  https://qiita.com/setonao/items/28749762c0bc1fbbf502
+- **Git hub**
+  - アカウント作成
+  - ワークスペースへのアクセス権限をharu-11に申請
+    - 申請方法は，何らかの手段を使ってusernameを伝えてください
+    - これをすると，pushやbranchの機能を使えるようになる
+- **Visual Studio Code**
+  - エディタはこれがおすすめです．
+  - `code`コマンドで，CLIからコードを開くことができる．（例：`code main.py`）
+- Windows WSLにrocketceaを導入するときに参考にしたサイト
+  - https://learn.microsoft.com/ja-jp/windows/wsl/install
+  - https://rocketcea.readthedocs.io/en/latest/quickstart.html#windows-10-with-wsl
+  - https://tenshoku-miti.com/takepon/windows-vscode-ternimal-ubuntu/
+  - https://qiita.com/setonao/items/28749762c0bc1fbbf502
 
 ## 使用方法（データ整理と時系列グラフ出力）  
 - `main.py`の１と２のパスを設定する．  
