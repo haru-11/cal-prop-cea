@@ -21,6 +21,7 @@ NASA-CEAを組み込んだ解析ソフトを作りたい。そこで、RocketCEA
      - https://qiita.com/ina111/items/4e09711b9121db90dbaa
      - https://github.com/sonofeft/RocketCEA/issues/11
      - https://visualstudio.microsoft.com/ja/visual-cpp-build-tools/
+       - 今まで，visual studioをインストールしたことない人は， bisual studio build toolのc++によるデスクトップ開発　をインストールする必要がある．  
   4. 私は諸々エラーが出て公式クイックスタートの通りにできなかったので、optionなしの`pip install rocketcea`で入れた。そうすると、[こちら](https://github.com/sonofeft/RocketCEA/issues/11#issuecomment-665428405)のエラーがでたので、コメントを参考に \.libs フォルダにある .dll ファイルをrocketceaフォルダ直下に移動することで解決した。
   5. **動作確認**  
   `python -c "from rocketcea.cea_obj import CEA_Obj; C=CEA_Obj(oxName='LOX', fuelName='LH2'); print(C.get_Isp())"`
