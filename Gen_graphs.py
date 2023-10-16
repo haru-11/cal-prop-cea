@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 from Gen_data import Gen_data
 import csv
 
-#確認用
-
 class Gen_graphs(Gen_data):
     def __init__(self, data_instance):
         super().__init__()
@@ -12,11 +10,12 @@ class Gen_graphs(Gen_data):
         self.gd = data_instance
 
     def gen_graphs(self, path, dirs, extension):
-        # ５．グラフのy軸範囲や要素などを確認
+        #6．グラフのy軸範囲や要素などを確認
         # 全体のグラフ設定
         
         fig1 = plt.figure(figsize=[10.0, 7.5])
         plt.rcParams["font.size"] = 17
+        
         # グラフ描写の１つ目
         ax1_1 = fig1.add_subplot(1, 1, 1)
         ax1_1.plot(

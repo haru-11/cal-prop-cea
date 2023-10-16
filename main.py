@@ -13,22 +13,33 @@ g_gif = gen_gif.Gen_gif()
 
 filename_data = []
 
-# １．【毎回変更する】実験データが格納されているフォルダ
-dir = 'C:\\Users\\SAHARA-19'
-data_path = filedialog.askdirectory(initialdir=dir, title="生データのあるフォルダを選択")
-zikken_path = os.path.join(data_path, '生データ')
 
-# ２．【毎回変更する】生成ファイルを格納するフォルダ
-result_path = os.path.join(data_path, '解析結果')
+
+#確認・変更すること
+
+#1. 実験データが格納されているフォルダ名
+data_dir = '生データ'
+
+#2. 解析結果を格納するために生成するフォルダ名
+result_dir = '解析結果'
+
+#3. 実験結果があるエクセルのcsvファイル名
+data_filename = 'MB$0'
+
+#4. 推進系のモード（一液式は1，二液式は2を記入）
+sel_bm = 1
+
+
+dir = 'Z:\\書庫\\研究テーマ\\推進系\\実験'
+data_path = filedialog.askdirectory(initialdir=dir, title=data_dir + 'が格納されているフォルダを選択')
+zikken_path = os.path.join(data_path, data_dir)
+result_path = os.path.join(data_path, result_dir)
 os.mkdir(result_path)
-
-# ３．一液式の場合は１を，二液式の場合は２を入れる．
-sel_bm = 2
 
 graph_file_extension = ".png"
 filename_result_ave = result_path + "\\result_ave.csv"
 filename_result_all = result_path + "\\result_all"
-filename_wavelogger = "MB$0.csv"
+filename_wavelogger = data_filename + ".csv"
 
 dirs = os.listdir(zikken_path)
 print("読み込んだフォルダリストは以下です．")

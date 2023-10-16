@@ -1,7 +1,9 @@
 from math import cos
-from rocketcea.cea_obj import CEA_Obj, add_new_oxidizer, add_new_propellant
+from rocketcea.cea_obj import add_new_oxidizer, add_new_propellant
+from rocketcea.cea_obj_w_units import CEA_Obj
 import csv
 import numpy as np
+import scipy.constants as const
 
 card_str = """
 oxid H2O2(L) H 2 O 2  wt%=60.00
@@ -19,8 +21,14 @@ h,cal=-68317. t(k)=298.15 rho.g/cc=1.0
 """
 add_new_propellant("60_H2O2_mono", card_str)
 
-ispObj_2 = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH")  # 二液
-ispObj_1 = CEA_Obj(propName="60_H2O2_mono")  # 一液
+ispObj_2 = CEA_Obj(oxName="60_H2O2", fuelName="C2H5OH", 
+                   pressure_units='MPa', temperature_units='K', 
+                   isp_units='sec', cstar_units='m/s', sonic_velocity_units='m/s', 
+                   enthalpy_units='J/kg', density_units='kg/m^3',specific_heat_units='J/kg-K',thermal_cond_units='W/cm-degC')  # 二液
+ispObj_1 = CEA_Obj(propName="60_H2O2_mono", 
+                   pressure_units='MPa', temperature_units='K', 
+                   isp_units='sec', cstar_units='m/s', sonic_velocity_units='m/s', 
+                   enthalpy_units='J/kg', density_units='kg/m^3',specific_heat_units='J/kg-K',thermal_cond_units='W/cm-degC')  # 一液
 
 
 class Gen_data:
@@ -46,20 +54,20 @@ class Gen_data:
         print(data_csv[data_len + 62])
         # --------------
 
-        # ４．【毎回確認】変数定義
-        At_diameter = 0.54  # [mm]
+        #5．【毎回確認】変数定義
+        At_diameter = 0.54  #スロート径[mm]
         Nozzle_cone_half_ang = 15 #ノズルコーン半頂角,Θ
-        Thrust_coefficient_effi = 0.983 #推力係数効率
+        Thrust_coefficient_effi = 0.92 #推力係数効率
         Interval = 100  # [Hz] サンプリング周波数
         O_RHO = 1.24       #60%H2O2の場合は1.24，水の場合は1.00
         F_RHO = 0.79       #エタノールの場合は0.79，水の場合は1.00
-        MR = 7.4      #OFを入力．一液の場合は0を記入
+        MR = 0      #OFを入力．一液の場合は0を記入
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
         moving_average_num = 10 #移動平均の個数
 
-        valve_column = 8  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        valve_column = 7  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
         Pc_column = 3  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
@@ -72,8 +80,7 @@ class Gen_data:
             OF_RHO = 1.24  # 推進剤の密度
         else:
             print("O/F ERROR")
-        nozzle_factor = 0.5*(1+ cos(Nozzle_cone_half_ang/180*3.141592)) #ノズル修正係数の計算
-
+        nozzle_factor = 0.5*(1+ cos(Nozzle_cone_half_ang/180*np.pi)) #ノズル修正係数の計算
 
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
@@ -102,7 +109,7 @@ class Gen_data:
         ]
         # ---------------------------
 
-        At = ((At_diameter / 2.0) * (At_diameter / 2.0)) * (np.pi) #[mm^2]
+        At = ((At_diameter / 2.0) ** 2 ) * (np.pi) #[mm^2]
         self.valve_data = []
         self.chamber_pressure_data = []
         self.supply_pressure_data = []
@@ -153,37 +160,19 @@ class Gen_data:
             self.chamber_temperature_data.append(float(data_csv[i][Tc_column]))
 
             if sel_bm == 2:
-                pambcf = ispObj_2.getFrozen_PambCf(
-                    Pamb=0.000001,
-                    Pc=(float(data_csv[i][Pc_column]) * 145.038),
-                    MR=MR,
-                    eps=100.0,
-                    frozenAtThroat=0,
-                )
-                vac_cstar_tc = ispObj_2.get_IvacCstrTc(
-                    (float(data_csv[i][Pc_column]) * 145.038),
-                    MR=MR,
-                    eps=100.0,
-                    frozen=1,
-                    frozenAtThroat=0,
-                )
+                pambcf = ispObj_2.getFrozen_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column])), MR=MR, eps=100.0, frozenAtThroat=0)
+                vac_cstar_tc = ispObj_2.get_IvacCstrTc(Pc=(float(data_csv[i][Pc_column])), MR=MR, eps=100.0, frozen=1, frozenAtThroat=0)
             elif sel_bm == 1:
-                vac_cstar_tc = ispObj_1.get_IvacCstrTc(
-                    (float(data_csv[i][Pc_column]) * 145.038),
-                    eps=100.0,
-                    frozen=0,
-                    frozenAtThroat=0,
-                )
-                pambcf = ispObj_1.get_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column]) * 145.038), eps=100.0)
+                pambcf = ispObj_1.get_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column])), eps=100.0)
+                vac_cstar_tc = ispObj_1.get_IvacCstrTc(Pc=(float(data_csv[i][Pc_column])), eps=100.0, frozen=0, frozenAtThroat=0)
+
             else:
                 print("select MR(O/F) error")
 
-            self.cstar_data.append(float(vac_cstar_tc[1]) * 0.3048)
+            self.cstar_data.append(float(vac_cstar_tc[1]))
             self.cf_cea_data.append(float(pambcf[0]))
             self.cf_act_data.append(float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi)
-            self.thrust_data.append(
-            float(data_csv[i][Pc_column]) * float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi * At * 1000
-            )
+            self.thrust_data.append(float(data_csv[i][Pc_column]) * float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi * At * 1000)
 
             if (    #流量はバルブオン以外は0とする．
                 i < (plt_start_num + (Pre_TRG * Interval))
@@ -195,7 +184,7 @@ class Gen_data:
             else:
                 self.isp_vac_data.append(
                     (self.thrust_data[i-plt_start_num])
-                    / (self.flow_rate_data[i-plt_start_num] * 9.80665)
+                    / (self.flow_rate_data[i-plt_start_num] * const.g)
                 )
                 self.cstar_cal_data.append(
                     self.chamber_pressure_data[i-plt_start_num]*At
