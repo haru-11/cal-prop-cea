@@ -56,6 +56,7 @@ class Gen_data:
 
         #5．【毎回確認】変数定義
         At_diameter = 0.54  #スロート径[mm]
+        Vc = 615.9468656 #燃焼室容積[mm^3]
         Nozzle_cone_half_ang = 15 #ノズルコーン半頂角,Θ
         Thrust_coefficient_effi = 0.92 #推力係数効率
         Interval = 100  # [Hz] サンプリング周波数
@@ -73,6 +74,9 @@ class Gen_data:
         Pa_column = 4  # 直上圧力のカラム
         flow_rate_column = 5  # 流量のカラム
         Tc_column = 6  # チャンバ温度のカラム
+
+        At = ((At_diameter / 2.0) ** 2 ) * (np.pi) #[mm^2]
+        Lster = Vc / At #[mm]
 
         if MR > 0:
             OF_RHO = (O_RHO * F_RHO) * (1 + MR)/(O_RHO + F_RHO * MR)
@@ -102,7 +106,10 @@ class Gen_data:
                 "Isp_A", 
                 "F_A", 
                 "Den_A", 
-                "AT", At_diameter, 
+                "ts_A", 
+                "Dt", At_diameter, 
+                "Vc", Vc, 
+                "L*", Lster, 
                 "O/F", MR, 
                 "RHO",OF_RHO, 
                 "Slect B/M", sel_bm
@@ -110,7 +117,6 @@ class Gen_data:
         ]
         # ---------------------------
 
-        At = ((At_diameter / 2.0) ** 2 ) * (np.pi) #[mm^2]
         self.valve_data = []
         self.chamber_pressure_data = []
         self.supply_pressure_data = []
@@ -128,6 +134,8 @@ class Gen_data:
         self.isp_vac_data = []
         self.total_throughput_data = []
         self.density_data = []
+        self.stay_time_data = []
+
         total_throughput = 0.0
 
         # 計算するデータ範囲取得
@@ -186,15 +194,11 @@ class Gen_data:
             ):
                 self.isp_vac_data.append(0.0)
                 self.cstar_cal_data.append(0.0)
+                self.stay_time_data.append(0.0)
             else:
-                self.isp_vac_data.append(
-                    (self.thrust_data[i-plt_start_num])
-                    / (self.flow_rate_data[i-plt_start_num] * const.g)
-                )
-                self.cstar_cal_data.append(
-                    self.chamber_pressure_data[i-plt_start_num]*At
-                    / (self.flow_rate_data[i-plt_start_num]/1000)
-                )
+                self.isp_vac_data.append((self.thrust_data[i-plt_start_num]) / (self.flow_rate_data[i-plt_start_num] * const.g))
+                self.cstar_cal_data.append(self.chamber_pressure_data[i-plt_start_num] * At / (self.flow_rate_data[i-plt_start_num] / 1000))
+                self.stay_time_data.append(Vc / (float(data_csv[i][flow_rate_column])*OF_RHO) * (float(density[0])/1000000))
 
             total_throughput = total_throughput + self.flow_rate_data[i-plt_start_num]*(1.0/Interval)
             self.total_throughput_data.append(total_throughput)
@@ -249,6 +253,9 @@ class Gen_data:
         density_ave = sum(self.density_data[Static_start_num:Static_end_num]) / len(
             self.density_data[Static_start_num:Static_end_num]
         )
+        stay_time_ave = sum(self.stay_time_data[Static_start_num:Static_end_num]) / len(
+            self.stay_time_data[Static_start_num:Static_end_num]
+        )
         cf_act_ave = sum(self.cf_act_data[Static_start_num:Static_end_num]) / len(
             self.cf_act_data[Static_start_num:Static_end_num]
         )
@@ -283,6 +290,7 @@ class Gen_data:
                 isp_vac_ave, 
                 thrust_ave, 
                 density_ave, 
+                stay_time_ave
             ]
         )
 
@@ -314,11 +322,14 @@ class Gen_data:
                 "Cstar_effi[-]", 
                 "Isp[sec]", 
                 "F[mN]", 
-                "Den[g/cm^3]"
-                "AT", At_diameter, 
+                "Den[g/cm^3]", 
+                "ts_A", 
+                "Dt", At_diameter, 
+                "Vc", Vc, 
+                "L*", Lster, 
                 "O/F", MR, 
                 "RHO",OF_RHO, 
-                "selct B/M", sel_bm
+                "Slect B/M", sel_bm
             ]
         ]
         for i in range(len(self.valve_data)):
@@ -338,7 +349,8 @@ class Gen_data:
                     self.cstar_effi_data[i], 
                     self.isp_vac_data[i], 
                     self.thrust_data[i], 
-                    self.density_data[i]
+                    self.density_data[i], 
+                    self.stay_time_data[i]
                 ]
             )
         with open(filename_result_all + "_" + dirs + ".csv", "w", newline="") as f:

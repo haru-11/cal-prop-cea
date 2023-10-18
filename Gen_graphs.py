@@ -78,7 +78,7 @@ class Gen_graphs(Gen_data):
         ax3_1.plot(self.gd.x, self.gd.thrust_data, color="m", label="thrust")
         #ax3_1.plot(self.gd.x, self.gd.cstar_data, color="k", label="cstar(CEA)")
         #ax3_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
-        ax3_1.set_ylim(0, 1000)  # プロットのY範囲
+        ax3_1.set_ylim(0, 200)  # プロットのY範囲
         ax3_1.set_xlabel("time[sec]")
         ax3_1.set_ylabel("Thrust[mN]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
@@ -87,7 +87,7 @@ class Gen_graphs(Gen_data):
         ax3_2 = ax3_1.twinx()
         ax3_2.plot(self.gd.x, self.gd.cf_act_data, color="k", label="Cf_act")
         #ax3_2.plot(self.gd.x, self.gd.chamber_pressure_data, color="r", label="Pc")
-        #ax3_2.set_ylim(0.0, 0.6)  # プロットのY範囲
+        ax3_2.set_ylim(0.0, 3)  # プロットのY範囲
         ax3_2.set_ylabel("Cf_act[-]")
         #ax3_2.set_ylabel("canber pressure[MPaA]")
         
