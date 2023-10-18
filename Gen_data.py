@@ -84,26 +84,27 @@ class Gen_data:
 
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [
-                "No",
-                "start",
-                "end",
-                "Pt_A",
-                "Pa_A",
-                "Pc_A",
-                "Tc_A",
-                "Mmfr_A",
-                "Total",
-                "Sum",
-                "Cf_cea",
-                "Cf_act",
-                "Cstar",
-                "Cstar_cea",
-                "Cstar_effi",
-                "Isp_A",
-                "F_A",
+                "No", 
+                "start", 
+                "end", 
+                "Pt_A", 
+                "Pa_A", 
+                "Pc_A", 
+                "Tc_A", 
+                "Mmfr_A", 
+                "Total", 
+                "Sum", 
+                "Cf_cea", 
+                "Cf_act", 
+                "Cstar", 
+                "Cstar_cea", 
+                "Cstar_effi", 
+                "Isp_A", 
+                "F_A", 
+                "Den_A", 
                 "AT", At_diameter, 
                 "O/F", MR, 
-                "RHO",OF_RHO,
+                "RHO",OF_RHO, 
                 "Slect B/M", sel_bm
             ]
         ]
@@ -126,6 +127,7 @@ class Gen_data:
         self.thrust_data = []
         self.isp_vac_data = []
         self.total_throughput_data = []
+        self.density_data = []
         total_throughput = 0.0
 
         # 計算するデータ範囲取得
@@ -162,9 +164,11 @@ class Gen_data:
             if sel_bm == 2:
                 pambcf = ispObj_2.getFrozen_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column])), MR=MR, eps=100.0, frozenAtThroat=0)
                 vac_cstar_tc = ispObj_2.get_IvacCstrTc(Pc=(float(data_csv[i][Pc_column])), MR=MR, eps=100.0, frozen=1, frozenAtThroat=0)
+                density = ispObj_2.get_Densities(Pc=(float(data_csv[i][Pc_column])), MR=MR, eps=100.0, frozen=1, frozenAtThroat=0)
             elif sel_bm == 1:
                 pambcf = ispObj_1.get_PambCf(Pamb=0.000001, Pc=(float(data_csv[i][Pc_column])), eps=100.0)
                 vac_cstar_tc = ispObj_1.get_IvacCstrTc(Pc=(float(data_csv[i][Pc_column])), eps=100.0, frozen=0, frozenAtThroat=0)
+                density = ispObj_1.get_Densities(Pc=(float(data_csv[i][Pc_column])), eps=100.0, frozen=0, frozenAtThroat=0)
 
             else:
                 print("select MR(O/F) error")
@@ -173,6 +177,7 @@ class Gen_data:
             self.cf_cea_data.append(float(pambcf[0]))
             self.cf_act_data.append(float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi)
             self.thrust_data.append(float(data_csv[i][Pc_column]) * float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi * At * 1000)
+            self.density_data.append(float(density[0])/1000)
 
             if (    #流量はバルブオン以外は0とする．
                 i < (plt_start_num + (Pre_TRG * Interval))
@@ -241,6 +246,9 @@ class Gen_data:
         thrust_ave = sum(self.thrust_data[Static_start_num:Static_end_num]) / len(
             self.thrust_data[Static_start_num:Static_end_num]
         )
+        density_ave = sum(self.density_data[Static_start_num:Static_end_num]) / len(
+            self.density_data[Static_start_num:Static_end_num]
+        )
         cf_act_ave = sum(self.cf_act_data[Static_start_num:Static_end_num]) / len(
             self.cf_act_data[Static_start_num:Static_end_num]
         )
@@ -257,23 +265,24 @@ class Gen_data:
 
         result_data_ave.append(
             [
-                dirs,
-                (Static_start_num - (Pre_TRG * Interval)) / Interval,
-                (Static_end_num - (Pre_TRG * Interval)) / Interval,
-                supply_pressure_ave,
-                above_pressure_ave,
-                chamber_pressure_ave,
-                chamber_temperature_ave,
-                flow_rate_ave,
-                total_throughput,
-                self.total_throughput_sum[len(self.total_throughput_sum)-1],
-                cf_cea_ave,
-                cf_act_ave,
-                cstar_ave,
-                cstar_cea_ave,
-                cstar_effi_ave,
-                isp_vac_ave,
-                thrust_ave,
+                dirs, 
+                (Static_start_num - (Pre_TRG * Interval)) / Interval, 
+                (Static_end_num - (Pre_TRG * Interval)) / Interval, 
+                supply_pressure_ave, 
+                above_pressure_ave, 
+                chamber_pressure_ave, 
+                chamber_temperature_ave, 
+                flow_rate_ave, 
+                total_throughput, 
+                self.total_throughput_sum[len(self.total_throughput_sum)-1], 
+                cf_cea_ave, 
+                cf_act_ave, 
+                cstar_ave, 
+                cstar_cea_ave, 
+                cstar_effi_ave, 
+                isp_vac_ave, 
+                thrust_ave, 
+                density_ave, 
             ]
         )
 
@@ -291,43 +300,45 @@ class Gen_data:
         # 計算に用いたデータを全てcsvで出力
         result_data_all = [
             [
-                "Time",
-                "Pt[MPaA]",
-                "Pa[MPaA]",
-                "Pc[MPaA]",
-                "Tc[K]",
-                "Mmfr[g/s]",
-                "Total[g]",
-                "Cf_cea[-]",
-                "Cf_act[-]",
-                "Cstar_CEA[sec]",
-                "Cater_cal[sec]",
-                "Cstar_effi[-]",
-                "Isp[sec]",
-                "F[mN]",
+                "Time", 
+                "Pt[MPaA]", 
+                "Pa[MPaA]", 
+                "Pc[MPaA]", 
+                "Tc[K]", 
+                "Mmfr[g/s]", 
+                "Total[g]", 
+                "Cf_cea[-]", 
+                "Cf_act[-]", 
+                "Cstar_CEA[sec]", 
+                "Cater_cal[sec]", 
+                "Cstar_effi[-]", 
+                "Isp[sec]", 
+                "F[mN]", 
+                "Den[g/cm^3]"
                 "AT", At_diameter, 
-                "O/F", MR,
-                "RHO",OF_RHO,
+                "O/F", MR, 
+                "RHO",OF_RHO, 
                 "selct B/M", sel_bm
             ]
         ]
         for i in range(len(self.valve_data)):
             result_data_all.append(
                 [
-                    self.x[i],
-                    self.supply_pressure_data[i],
-                    self.above_pressure_data[i],
-                    self.chamber_pressure_data[i],
-                    self.chamber_temperature_data[i],
-                    self.flow_rate_data[i],
-                    self.total_throughput_data[i],
-                    self.cf_cea_data[i],
-                    self.cf_act_data[i],
-                    self.cstar_data[i],
-                    self.cstar_cal_data[i],
-                    self.cstar_effi_data[i],
-                    self.isp_vac_data[i],
-                    self.thrust_data[i]
+                    self.x[i], 
+                    self.supply_pressure_data[i], 
+                    self.above_pressure_data[i], 
+                    self.chamber_pressure_data[i], 
+                    self.chamber_temperature_data[i], 
+                    self.flow_rate_data[i], 
+                    self.total_throughput_data[i], 
+                    self.cf_cea_data[i], 
+                    self.cf_act_data[i], 
+                    self.cstar_data[i], 
+                    self.cstar_cal_data[i], 
+                    self.cstar_effi_data[i], 
+                    self.isp_vac_data[i], 
+                    self.thrust_data[i], 
+                    self.density_data[i]
                 ]
             )
         with open(filename_result_all + "_" + dirs + ".csv", "w", newline="") as f:
