@@ -11,6 +11,7 @@ class Gen_graphs(Gen_data):
 
     def gen_graphs(self, path, dirs, extension):
         #6．グラフのy軸範囲や要素などを確認
+        
         # 全体のグラフ設定
         
         fig1 = plt.figure(figsize=[10.0, 7.5])
