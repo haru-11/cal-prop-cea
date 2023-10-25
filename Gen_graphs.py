@@ -11,56 +11,61 @@ class Gen_graphs(Gen_data):
 
     def gen_graphs(self, path, dirs, extension):
         #6．グラフのy軸範囲や要素などを確認
-        
+
         # 全体のグラフ設定
         
         fig1 = plt.figure(figsize=[10.0, 7.5])
         plt.rcParams["font.size"] = 17
         
-        # グラフ描写の１つ目
+        # グラフ描写の１つ目(チャンバ内圧力とチャンバ内温度)
+        
+        # チャンバ内圧力
         ax1_1 = fig1.add_subplot(1, 1, 1)
-        ax1_1.plot(
-            self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
-        )
+        ax1_1.plot(self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure")
         ax1_1.set_ylim(0, 0.5)  # プロットのY範囲
         ax1_1.set_xlabel("Time[sec]")
         ax1_1.set_ylabel("Camber pressure[MPaA]")
         ax1_1.grid(color='k', linestyle=':', linewidth=0.3)
 
+        # チャンバ内温度
         ax1_2 = ax1_1.twinx()
-        ax1_2.plot(
-            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp"
-        )
-        ax1_2.set_ylim(0, 1000)  # プロットのY範囲
+        ax1_2.plot(self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp")
+        ax1_2.set_ylim(0, 200)  # プロットのY範囲
         ax1_2.set_ylabel("Camber temperature[℃]")
 
+        # バルブ電圧
         ax1_3 = ax1_1.twinx()
         ax1_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
         ax1_3.set_ylim(0, 5)  # プロットのY範囲
         ax1_3.axis("off")
 
+        # 凡例
         h1, l1 = ax1_1.get_legend_handles_labels()
         h2, l2 = ax1_2.get_legend_handles_labels()
         ax1_1.legend(h1 + h2, l1 + l2)
 
-        plt.savefig(path + "\\" + dirs + "_fig1" + extension)
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_Pc_Tc" + extension)
+        # 図のクリア
         plt.clf()
 
-        # グラフ描写の２つ目
+        # グラフ描写の２つ目(圧力と流量)
+
+        # チャンバ内圧力
         ax2_1 = fig1.add_subplot(1, 1, 1)
-        ax2_1.plot(
-            self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
-        )
+        ax2_1.plot(self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure")
         ax2_1.set_ylim(0, 0.5)  # プロットのY範囲
         ax2_1.set_xlabel("time[sec]")
         ax2_1.set_ylabel("camber pressure[MPaA]")
         ax2_1.grid(color='k', linestyle=':', linewidth=0.3)
 
+        # 質量流量
         ax2_2 = ax2_1.twinx()
         ax2_2.plot(self.gd.x, self.gd.flow_rate_data, color="c", label="flow_rate")
         ax2_2.set_ylim(0, 1.0)  # プロットのY範囲
         ax2_2.set_ylabel("flow rate[ml/s]")
 
+        # バルブ電圧
         ax2_3 = ax2_1.twinx()
         ax2_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
         ax2_3.set_ylim(0, 5)  # プロットのY範囲
@@ -71,10 +76,14 @@ class Gen_graphs(Gen_data):
         h2, l2 = ax2_2.get_legend_handles_labels()
         ax2_1.legend(h1 + h2, l1 + l2)
 
-        plt.savefig(path + "\\" + dirs + "_fig2" + extension)
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_Pc_mdot" + extension)
+        # 図のクリア
         plt.clf()
 
-        # グラフ描写の３つ目
+        # グラフ描写の３つ目(推力と推力係数)
+
+        # 推力
         ax3_1 = fig1.add_subplot(1, 1, 1)
         ax3_1.plot(self.gd.x, self.gd.thrust_data, color="m", label="thrust")
         #ax3_1.plot(self.gd.x, self.gd.cstar_data, color="k", label="cstar(CEA)")
@@ -84,7 +93,7 @@ class Gen_graphs(Gen_data):
         ax3_1.set_ylabel("Thrust[mN]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
 
-        
+        # 推力係数
         ax3_2 = ax3_1.twinx()
         ax3_2.plot(self.gd.x, self.gd.cf_act_data, color="k", label="Cf_act")
         #ax3_2.plot(self.gd.x, self.gd.chamber_pressure_data, color="r", label="Pc")
@@ -93,6 +102,7 @@ class Gen_graphs(Gen_data):
         #ax3_2.set_ylabel("canber pressure[MPaA]")
         
 
+        # バルブ電圧
         ax3_3 = ax3_1.twinx()
         ax3_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
         ax3_3.set_ylim(0, 5)  # プロットのY範囲
@@ -103,14 +113,14 @@ class Gen_graphs(Gen_data):
         h2, l2 = ax3_2.get_legend_handles_labels()
         ax3_1.legend(h1 + h2, l1 + l2)
 
-        # 凡例
-        h1, l1 = ax2_1.get_legend_handles_labels()
-        h2, l2 = ax2_2.get_legend_handles_labels()
-        ax2_1.legend(h1 + h2, l1 + l2)
-        plt.savefig(path + "\\" + dirs + "_fig3" + extension)
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_F_Cf" + extension)
+        # 図のクリア
         plt.clf()
 
-        # グラフ描写の4つ目
+        # グラフ描写の4つ目(c*とc*効率)
+
+        # c*
         ax4_1 = fig1.add_subplot(1, 1, 1)
         ax4_1.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="m", label="cstar")
         ax4_1.set_ylim(0, 4000)  # プロットのY範囲
@@ -118,13 +128,13 @@ class Gen_graphs(Gen_data):
         ax4_1.set_ylabel("Characteristic exhaust velocity[m/s]")
         ax4_1.grid(color='k', linestyle=':', linewidth=0.3)
 
-        
+        # c*効率
         ax4_2 = ax4_1.twinx()
         ax4_2.plot(self.gd.x, self.gd.cstar_effi_ma_data, color="k", label="cstar_effi")
         ax4_2.set_ylim(0, 1.6)  # プロットのY範囲
         ax4_2.set_ylabel("Cstar_efficiency[-]")
         
-        
+        # バルブ電圧
         ax4_3 = ax4_1.twinx()
         ax4_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
         ax4_3.set_ylim(0, 5)  # プロットのY範囲
@@ -134,9 +144,13 @@ class Gen_graphs(Gen_data):
         h1, l1 = ax4_1.get_legend_handles_labels()
         h2, l2 = ax4_2.get_legend_handles_labels()
         ax4_1.legend(h1 + h2, l1 + l2)
-        plt.savefig(path + "\\" + dirs + "_fig4" + extension)
-        # plt.show()
 
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_cster_cstereffi" + extension)
+        # 図のクリア
+        plt.clf()
+
+        # プロットの終了
         plt.close()
 
     def gen_graphs_ave(self, path, filename):
