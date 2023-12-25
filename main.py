@@ -12,10 +12,10 @@ g_gif = gen_gif.Gen_gif()
 filename_data = []
 
 # １．【毎回変更する】実験データが格納されているフォルダ
-zikken_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M1研究\\FY2021実験\\211201_NM-12_一液式_ワイヤーカット影響確認試験\\解析データ"
+zikken_path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2023実験\\231009_新インジェクタ噴射試験\\一液\\解析データ"
 
 # ２．【毎回変更する】生成ファイルを格納するフォルダ
-result_path = "C:\\Users\\SAHARA-7\\OneDrive - 東京都公立大学法人\\ドキュメント\\首都大\\M1研究\\FY2021実験\\211201_NM-12_一液式_ワイヤーカット影響確認試験\\解析結果_新解析ソフト2"
+result_path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2023実験\\231009_新インジェクタ噴射試験\\一液\\解析結果"
 
 # ３．一液式の場合は１を，二液式の場合は２を入れる．
 sel_bm = 1
@@ -23,6 +23,7 @@ sel_bm = 1
 graph_file_extension = ".png"
 filename_result_ave = result_path + "\\result_ave.csv"
 filename_result_all = result_path + "\\result_all"
+#filename_wavelogger = "auto$0.csv"
 filename_wavelogger = "auto$0.csv"
 
 dirs = os.listdir(zikken_path)
