@@ -47,7 +47,9 @@ class Gen_data:
         # --------------
 
         # ４．【毎回確認】変数定義
+
         At_diameter = 1.1  # [mm]
+
         Nozzle_cone_half_ang = 15 #ノズルコーン半頂角,Θ
         Thrust_coefficient_effi = 0.983 #推力係数効率
         Interval = 100  # [Hz] サンプリング周波数
@@ -67,6 +69,7 @@ class Gen_data:
         Tc_column = 6 # チャンバ下流の温度のカラム
         TcM_column = 6 # チャンバ中流の温度のカラム
         TcU_column = 6 # チャンバ上流の温度のカラム
+
 
         if MR > 0:
             OF_RHO = (O_RHO * F_RHO) * (1 + MR)/(O_RHO + F_RHO * MR)
@@ -187,7 +190,9 @@ class Gen_data:
             else:
                 print("select MR(O/F) error")
 
+
             #print(str(i)+",cf:"+str(pambcf[0])+","+str(vac_cstar_tc))
+
             self.cstar_data.append(float(vac_cstar_tc[1]) * 0.3048)
             self.cf_cea_data.append(float(pambcf[0]))
             self.cf_act_data.append(float(pambcf[0])*nozzle_factor*Thrust_coefficient_effi)

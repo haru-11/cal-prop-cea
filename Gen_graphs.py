@@ -37,6 +37,7 @@ class Gen_graphs(Gen_data):
             self.gd.x, self.gd.chamber_Upper_temperature_data, color="g", label="temp_U"
         )
         ax1_2.set_ylim(0, 1200)  # プロットのY範囲
+
         ax1_2.set_ylabel("Camber temperature[℃]")
 
         ax1_3 = ax1_1.twinx()
@@ -63,7 +64,7 @@ class Gen_graphs(Gen_data):
 
         ax2_2 = ax2_1.twinx()
         ax2_2.plot(self.gd.x, self.gd.flow_rate_data, color="c", label="flow_rate")
-        ax2_2.set_ylim(0, 1.0)  # プロットのY範囲
+        ax2_2.set_ylim(0, 2.0)  # プロットのY範囲
         ax2_2.set_ylabel("flow rate[ml/s]")
 
         ax2_3 = ax2_1.twinx()
@@ -118,7 +119,9 @@ class Gen_graphs(Gen_data):
         # グラフ描写の4つ目
         ax4_1 = fig1.add_subplot(1, 1, 1)
         ax4_1.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="m", label="cstar")
+
         ax4_1.set_ylim(0, 1000)  # プロットのY範囲
+
         ax4_1.set_xlabel("Time[s]")
         ax4_1.set_ylabel("Characteristic exhaust velocity[m/s]")
         ax4_1.grid(color='k', linestyle=':', linewidth=0.3)
