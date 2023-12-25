@@ -21,16 +21,23 @@ class Gen_graphs(Gen_data):
         ax1_1.plot(
             self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
         )
-        ax1_1.set_ylim(0, 0.5)  # プロットのY範囲
+        ax1_1.set_ylim(0, 0.6)  # プロットのY範囲
         ax1_1.set_xlabel("Time[sec]")
         ax1_1.set_ylabel("Camber pressure[MPaA]")
         ax1_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         ax1_2 = ax1_1.twinx()
         ax1_2.plot(
-            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp"
+            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp_L"
         )
-        ax1_2.set_ylim(0, 200)  # プロットのY範囲
+        ax1_2.plot(
+            self.gd.x, self.gd.chamber_Middle_temperature_data, color="m", label="temp_M"
+        )
+        ax1_2.plot(
+            self.gd.x, self.gd.chamber_Upper_temperature_data, color="g", label="temp_U"
+        )
+        ax1_2.set_ylim(0, 1200)  # プロットのY範囲
+
         ax1_2.set_ylabel("Camber temperature[℃]")
 
         ax1_3 = ax1_1.twinx()
@@ -50,7 +57,7 @@ class Gen_graphs(Gen_data):
         ax2_1.plot(
             self.gd.x, self.gd.chamber_pressure_data, color="k", label="pressure"
         )
-        ax2_1.set_ylim(0, 0.5)  # プロットのY範囲
+        ax2_1.set_ylim(0, 0.6)  # プロットのY範囲
         ax2_1.set_xlabel("time[sec]")
         ax2_1.set_ylabel("camber pressure[MPaA]")
         ax2_1.grid(color='k', linestyle=':', linewidth=0.3)
@@ -112,7 +119,9 @@ class Gen_graphs(Gen_data):
         # グラフ描写の4つ目
         ax4_1 = fig1.add_subplot(1, 1, 1)
         ax4_1.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="m", label="cstar")
-        ax4_1.set_ylim(0, 3000)  # プロットのY範囲
+
+        ax4_1.set_ylim(0, 1000)  # プロットのY範囲
+
         ax4_1.set_xlabel("Time[s]")
         ax4_1.set_ylabel("Characteristic exhaust velocity[m/s]")
         ax4_1.grid(color='k', linestyle=':', linewidth=0.3)
@@ -120,7 +129,7 @@ class Gen_graphs(Gen_data):
         
         ax4_2 = ax4_1.twinx()
         ax4_2.plot(self.gd.x, self.gd.cstar_effi_ma_data, color="k", label="cstar_effi")
-        ax4_2.set_ylim(0, 1.6)  # プロットのY範囲
+        ax4_2.set_ylim(0, 1.2)  # プロットのY範囲
         ax4_2.set_ylabel("Cstar_efficiency[-]")
         
         
@@ -153,9 +162,9 @@ class Gen_graphs(Gen_data):
         data_end_num = data_len - 1
 
         Pc_A_column = 5
-        Mmfr_A_column = 7
-        Sum_column = 9
-        Cstar_effi_column = 14
+        Mmfr_A_column = 9
+        Sum_column = 11
+        Cstar_effi_column = 16
 
         Pc_A_data = []
         Mmfr_A_data = []
