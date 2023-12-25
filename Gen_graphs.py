@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ptick
 from Gen_data import Gen_data
 import csv
 
@@ -45,7 +46,7 @@ class Gen_graphs(Gen_data):
         ax1_1.legend(h1 + h2, l1 + l2)
 
         # 図の保存
-        plt.savefig(path + "\\" + dirs + "_Pc_Tc" + extension)
+        plt.savefig(path + "\\" + dirs + "_fig1" + extension)
         # 図のクリア
         plt.clf()
 
@@ -63,7 +64,7 @@ class Gen_graphs(Gen_data):
         ax2_2 = ax2_1.twinx()
         ax2_2.plot(self.gd.x, self.gd.flow_rate_data, color="c", label="flow_rate")
         ax2_2.set_ylim(0, 1.0)  # プロットのY範囲
-        ax2_2.set_ylabel("flow rate[ml/s]")
+        ax2_2.set_ylabel("flow rate[g/s]")
 
         # バルブ電圧
         ax2_3 = ax2_1.twinx()
@@ -77,7 +78,7 @@ class Gen_graphs(Gen_data):
         ax2_1.legend(h1 + h2, l1 + l2)
 
         # 図の保存
-        plt.savefig(path + "\\" + dirs + "_Pc_mdot" + extension)
+        plt.savefig(path + "\\" + dirs + "_fig2" + extension)
         # 図のクリア
         plt.clf()
 
@@ -114,7 +115,7 @@ class Gen_graphs(Gen_data):
         ax3_1.legend(h1 + h2, l1 + l2)
 
         # 図の保存
-        plt.savefig(path + "\\" + dirs + "_F_Cf" + extension)
+        plt.savefig(path + "\\" + dirs + "_fig3" + extension)
         # 図のクリア
         plt.clf()
 
@@ -146,7 +147,80 @@ class Gen_graphs(Gen_data):
         ax4_1.legend(h1 + h2, l1 + l2)
 
         # 図の保存
-        plt.savefig(path + "\\" + dirs + "_cster_cstereffi" + extension)
+        plt.savefig(path + "\\" + dirs + "_fig4" + extension)
+        # 図のクリア
+        plt.clf()
+
+        # グラフ描写の5つ目(推進剤滞在時間とチャンバ内密度)
+
+        # 推進剤滞在時間
+        ax5_1 = fig1.add_subplot(1, 1, 1)
+        ax5_1.plot(self.gd.x, self.gd.stay_time_data, color="m", label="stay_time")
+        ax5_1.set_ylim(0, 0.05)
+        ax5_1.set_xlabel("Time[s]")
+        ax5_1.set_ylabel("Propellant stay time[s]")
+        ax5_1.grid(color='k', linestyle=':', linewidth=0.3)
+
+        # チャンバ内密度
+        ax5_2 = ax5_1.twinx()
+        ax5_2.plot(self.gd.x, self.gd.density_data, color="k", label="density")
+        ax5_2.yaxis.set_major_formatter(ptick.ScalarFormatter(useMathText=True))
+        ax5_2.ticklabel_format(style="sci", axis="y", scilimits=(-3, -3))
+        ax5_2.set_ylim(0, 0.0025)
+        ax5_2.set_ylabel("Density[g/cm$^{3}$]")
+
+        # バルブ電圧
+        ax5_3 = ax5_1.twinx()
+        ax5_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
+        ax5_3.set_ylim(0, 5)  # プロットのY範囲
+        ax5_3.axis("off")
+
+        # 凡例
+        h1, l1 = ax5_1.get_legend_handles_labels()
+        h2, l2 = ax5_2.get_legend_handles_labels()
+        ax5_1.legend(h1 + h2, l1 + l2)
+
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_fig5" + extension)
+        # 図のクリア
+        plt.clf()
+
+        # グラフ描写の6つ目(c*の元データと移動平均値と移動中央値)
+
+        # 元データ
+        ax6_1 = fig1.add_subplot(1, 1, 1)
+        ax6_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
+        ax6_1.set_ylim(0, 4000)  # プロットのY範囲
+        ax6_1.set_xlabel("Time[s]")
+        ax6_1.set_ylabel("Characteristic exhaust velocity[m/s]")
+        ax6_1.grid(color='k', linestyle=':', linewidth=0.3)
+
+        # 移動平均値
+        ax6_2 = ax6_1.twinx()
+        ax6_2.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="c", label="cstar_mean")
+        ax6_2.set_ylim(0, 4000)
+        ax6_2.set_ylabel("Characteristic exhaust velocity mean [m/s]")
+
+        # 移動中央値
+        ax6_3 = ax6_1.twinx()
+        ax6_3.plot(self.gd.x, self.gd.cstar_cal_mm_data, color="y", label="cstar_median")
+        ax6_3.set_ylim(0, 4000)
+        ax6_3.set_ylabel("Characteristic exhaust velocity median [m/s]")
+
+        # バルブ電圧
+        ax6_4 = ax6_1.twinx()
+        ax6_4.plot(self.gd.x, self.gd.valve_data, color="k", label="valve")
+        ax6_4.set_ylim(0, 5)  # プロットのY範囲
+        ax6_4.axis("off")
+
+        # 凡例
+        h1, l1 = ax6_1.get_legend_handles_labels()
+        h2, l2 = ax6_2.get_legend_handles_labels()
+        h3, l3 = ax6_3.get_legend_handles_labels()
+        ax6_1.legend(h1 + h2 + h3, l1 + l2 + l3)
+
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_fig6" + extension)
         # 図のクリア
         plt.clf()
 
