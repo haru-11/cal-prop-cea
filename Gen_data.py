@@ -2,6 +2,7 @@ from math import cos
 from rocketcea.cea_obj import add_new_oxidizer, add_new_propellant
 from rocketcea.cea_obj_w_units import CEA_Obj
 import csv
+import sys
 import numpy as np
 import scipy.constants as const
 import statistics
@@ -57,24 +58,26 @@ class Gen_data:
 
         #5．【毎回確認】変数定義
         Dt = 0.54  # スロート径[mm]
-        Vc = 615.946865648317 # 燃焼室容積[mm^3]
-        Nozzle_cone_half_ang = 15 # ノズルコーン半頂角,Θ
-        Thrust_coefficient_effi = 0.92 # 推力係数効率
+        Vc = 615.946865648317  # 燃焼室容積[mm^3]
+        Nozzle_cone_half_ang = 15  # ノズルコーン半頂角,Θ
+        Thrust_coefficient_effi = 0.92  # 推力係数効率
         Interval = 100  # [Hz] サンプリング周波数
-        O_RHO = 1.24       # 60%H2O2の場合は1.24，水の場合は1.00
-        F_RHO = 0.79       # エタノールの場合は0.79，水の場合は1.00
-        MR = 7.4      # OFを入力．一液の場合は0を記入
+        O_RHO = 1.24  # 60%H2O2の場合は1.24，水の場合は1.00
+        F_RHO = 0.79  # エタノールの場合は0.79，水の場合は1.00
+        MR = 7.4  # OFを入力．一液の場合は0を記入
+        LR = 34000  # アトマイザのLohm Rate[Lohm]
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？
         Valve_TRG = 3.00  # [V]バルブの立ち上がりのエッジトリガの閾値
         Statick_ratio = 0.2  # [-]定常区間の割合を指定
-        moving_num = 10 # 移動平均の個数
+        #ma_moving_num = 5  # 移動平均の項数
+        #mm_moving_num = 50  # 移動中央値の項数
 
-        valve_column = 7  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
-        Pt_column = 2  # 供給圧力がのカラム
-        Pa_column = 4  # 直上圧力のカラム
-        Pc_column = 3  # チャンバ圧力のカラム
-        Tc_column = 6  # チャンバ温度のカラム
-        flow_rate_column = 5  # 流量のカラム
+        valve_name = "バルブCH1"  # バルブ電圧のデータ名
+        Pt_name = "供給圧力"  # 供給圧力のデータ名
+        Pa_name = "チャンバ直上圧力"  # 直上圧力のデータ名
+        Pc_name = "チャンバ内圧力"  # チャンバ圧力のデータ名
+        Tc_name = "チャンバ内温度1"  # チャンバ温度のデータ名
+        flow_rate_name = "体積流量"  # 体積流量のデータ名
 
         At = ((Dt / 2.0) ** 2 ) * (np.pi) # [mm^2]
         Lster = Vc / At # [mm]
@@ -85,10 +88,13 @@ class Gen_data:
             OF_RHO = 1.24  # 推進剤の密度
         else:
             print("O/F ERROR")
+            sys.exit()
+
         nozzle_factor = 0.5*(1+ cos(Nozzle_cone_half_ang/180*np.pi)) # ノズル修正係数の計算
         
         # ---------------------------
 
+        # ---1---出力する項目
         self.valve_data = []
         self.supply_pressure_data = []  # 供給圧力
         self.above_pressure_data = []  # 直上圧力
@@ -100,19 +106,37 @@ class Gen_data:
         self.cf_act_data = []  # 効率をかけた実際の推力係数
         self.thrust_data = []  # 推力
         self.isp_vac_data = []  # 比推力
+        #self.isp_vac_mm_data = []  # 移動中央値法による比推力
         self.cstar_cea_data = []  # ceaによるc*
         self.cstar_cal_data = []  # 実験値によるc*
         self.cstar_effi_data = []  # c*効率
-        self.cstar_cal_ma_data = []  # 実験値によるc*の移動平均値
-        self.cstar_effi_ma_data = []  # 移動平均値によるc*効率
-        self.cstar_cal_mm_data = []  # 実験値によるc*の移動中央値
-        self.cstar_effi_mm_data = []  # 移動中央値によるc*効率
+        #self.cstar_cal_ma_data = []  # 実験値によるc*の移動平均値
+        #self.cstar_effi_ma_data = []  # 移動平均値によるc*効率
+        #self.cstar_cal_mm_data = []  # 実験値によるc*の移動中央値
+        #self.cstar_effi_mm_data = []  # 移動中央値によるc*効率
         self.density_data = []  # 燃焼室内密度
         self.stay_time_data = []  # 推進剤滞在時間
 
         total_throughput = 0.0
 
         # 計算するデータ範囲取得
+        
+        name_list = [valve_name, Pt_name, Pa_name, Pc_name, Tc_name, flow_rate_name]
+        column = []
+        for i in range(len(name_list)):
+            if  name_list[i] in data_csv[35]:
+                column.append(data_csv[35].index(name_list[i]))
+            else:
+                print("ERROR\nIt's not "+ name_list[i] )
+                sys.exit()
+
+        valve_column = column[0]
+        Pt_column = column[1]
+        Pa_column = column[2]
+        Pc_column = column[3]
+        Tc_column = column[4]
+        flow_rate_column = column[5]
+
         valve_open_num = 0
         plt_start_num = 0
         plt_end_num = 0
@@ -135,6 +159,8 @@ class Gen_data:
         # --------------------------
 
         # 各データをlistに入れる．
+
+        # ---2---出力する項目を変更する場合は編集すること
         for i in range(plt_start_num, plt_end_num):
             self.valve_data.append(float(data_csv[i][valve_column]))
             self.chamber_pressure_data.append(float(data_csv[i][Pc_column]))
@@ -164,7 +190,7 @@ class Gen_data:
             if (    #流量はバルブオン以外は0とする．
                 i < (plt_start_num + (Pre_TRG * Interval))
                 or i > (plt_end_num - (Pre_TRG * Interval))
-                or (float(data_csv[i][flow_rate_column]) == 0.0)
+                or (float(data_csv[i][flow_rate_column]) < 0.01)
             ):
                 self.isp_vac_data.append(0.0)
                 self.cstar_cal_data.append(0.0)
@@ -180,17 +206,20 @@ class Gen_data:
 
         self.x = np.arange((0 - Pre_TRG), len(self.valve_data) / Interval - Pre_TRG, 1 / Interval)  # バルブデータから時間を生  
 
-        # c*の移動平均値および移動中央値を出す
-        self.cstar_cal_ma_data = self.moving_ave(self.cstar_cal_data, moving_num)  # c*の移動平均値
-        self.cstar_cal_mm_data = self.moving_med(self.cstar_cal_data, moving_num)  # c*の移動中央値
-        for i in range(len(self.x)):
-            self.cstar_effi_ma_data.append(self.cstar_cal_ma_data[i] / self.cstar_cea_data[i])  # 移動平均値によるc*効率
-            self.cstar_effi_mm_data.append(self.cstar_cal_mm_data[i] / self.cstar_cea_data[i])  # 移動中央値によるc*効率
+        # 比推力およびc*の移動平均および移動中央値を出す
+        #self.isp_vac_mm_data = self.moving_med(self.isp_vac_data, mm_moving_num)  # 比推力の移動中央値
+        #self.cstar_cal_ma_data = self.moving_ave(self.cstar_cal_data, ma_moving_num)  # c*の移動平均
+        #self.cstar_cal_mm_data = self.moving_med(self.cstar_cal_data, mm_moving_num)  # c*の移動中央値
+        #for i in range(len(self.x)):
+            #self.cstar_effi_ma_data.append(self.cstar_cal_ma_data[i] / self.cstar_cea_data[i])  # 移動平均値によるc*効率
+            #self.cstar_effi_mm_data.append(self.cstar_cal_mm_data[i] / self.cstar_cea_data[i])  # 移動中央値によるc*効率
 
         
         # ------------------------------
 
         # 定常区間の平均値を取得
+        
+        # ---3---出力する項目の平均値
         Static_start_num = int((plt_end_num - plt_start_num - (Pre_TRG * Interval * 2)) * (1 - Statick_ratio)) + int(Pre_TRG * Interval)  # 平均取得開始番号
         Static_end_num = int(plt_end_num - plt_start_num - (Pre_TRG * Interval * 2)) + int(Pre_TRG * Interval)  # 平均取得終了時間
         supply_pressure_ave = statistics.mean(self.supply_pressure_data[Static_start_num:Static_end_num])  # 供給圧力
@@ -202,13 +231,14 @@ class Gen_data:
         cf_act_ave = statistics.mean(self.cf_act_data[Static_start_num:Static_end_num])  # 効率をかけた実際の推力係数
         thrust_ave = statistics.mean(self.thrust_data[Static_start_num:Static_end_num])  # 推力
         isp_vac_ave = statistics.mean(self.isp_vac_data[Static_start_num:Static_end_num])  # 比推力
+        #isp_vac_mm_ave = statistics.mean(self.isp_vac_mm_data[Static_start_num:Static_end_num])  # 比推力の移動中央値
         cstar_cea_ave = statistics.mean(self.cstar_cea_data[Static_start_num:Static_end_num])  # ceaによるc*
         cstar_cal_ave = statistics.mean(self.cstar_cal_data[Static_start_num:Static_end_num])  # 実験値によるc*
         cstar_effi_ave = statistics.mean(self.cstar_effi_data[Static_start_num:Static_end_num])  # c*効率
-        cstar_cal_ma_ave = statistics.mean(self.cstar_cal_ma_data[Static_start_num:Static_end_num])  # 実験値によるc*の移動平均値
-        cstar_effi_ma_ave = statistics.mean(self.cstar_effi_ma_data[Static_start_num:Static_end_num])  # 移動平均値によるc*効率
-        cstar_cal_mm_ave = statistics.mean(self.cstar_cal_mm_data[Static_start_num:Static_end_num])  # 実験値によるc*の移動中央値
-        cstar_effi_mm_ave = statistics.mean(self.cstar_effi_mm_data[Static_start_num:Static_end_num])  # 移動中央値によるc*効率
+        #cstar_cal_ma_ave = statistics.mean(self.cstar_cal_ma_data[Static_start_num:Static_end_num])  # 実験値によるc*の移動平均
+        #cstar_effi_ma_ave = statistics.mean(self.cstar_effi_ma_data[Static_start_num:Static_end_num])  # 移動平均によるc*効率
+        #cstar_cal_mm_ave = statistics.mean(self.cstar_cal_mm_data[Static_start_num:Static_end_num])  # 実験値によるc*の移動中央値
+        #cstar_effi_mm_ave = statistics.mean(self.cstar_effi_mm_data[Static_start_num:Static_end_num])  # 移動中央値によるc*効率
         density_ave = statistics.mean(self.density_data[Static_start_num:Static_end_num])  # 燃焼室内密度
         stay_time_ave = statistics.mean(self.stay_time_data[Static_start_num:Static_end_num])  # 推進剤滞在時間
         
@@ -219,6 +249,7 @@ class Gen_data:
         self.total_throughput_sum.append(_tt)
         self.chamber_pressure_ave_sum.append(chamber_pressure_ave)
 
+        # ---4---出力する項目の平均値のヘッダー
         result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
             [  # データ名
                 "No",  # 実験番号
@@ -235,13 +266,14 @@ class Gen_data:
                 "Cf_act",  # 効率をかけた実際の推力係数
                 "F",  # 推力
                 "Isp",  # 比推力
+                #"Isp_mm",  # 比推力の移動中央値
                 "Cstar_cea",  # ceaによるc*
                 "Cstar_cal",  # 実験値によるc*
                 "Cstar_effi",  # c*効率
-                "Cstar_cal_ma",  # 実験値によるc*の移動平均値
-                "Cstar_effi_ma",  # 移動平均値によるc*効率
-                "Cstar_cal_mm",  # 実験値によるc*の移動中央値
-                "Cstar_effi_mm",  # 移動中央値によるc*効率
+                #"Cstar_cal_ma",  # 実験値によるc*の移動平均値
+                #"Cstar_effi_ma",  # 移動平均値によるc*効率
+                #"Cstar_cal_mm",  # 実験値によるc*の移動中央値
+                #"Cstar_effi_mm",  # 移動中央値によるc*効率
                 "Den",  # 燃焼室内密度
                 "ts",  # 推進剤滞在時間
                 "Dt",  # スロート径
@@ -249,7 +281,8 @@ class Gen_data:
                 "L*",  # 燃焼室特性長さ
                 "O/F",  # 混合比
                 "RHO",  # 推進剤密度
-                "Slect B/M"  # モード
+                "Slect B/M",  # モード
+                "Lohm Rate"  # アトマイザのLohm Rate
             ], 
             [  # 単位
                 "-",  # 実験番号
@@ -266,13 +299,14 @@ class Gen_data:
                 "-",  # 効率をかけた実際の推力係数
                 "mN",  # 推力
                 "s",  # 比推力
+                #"s",  # 比推力の移動中央値
                 "m/s",  # ceaによるc*
                 "m/s",  # 実験値によるc*
                 "-",  # c*効率
-                "m/s",  # 実験値によるc*の移動平均値
-                "-",  # 移動平均値によるc*効率
-                "m/s",  # 実験値によるc*の移動中央値
-                "-",  # 移動中央値によるc*効率
+                #"m/s",  # 実験値によるc*の移動平均値
+                #"-",  # 移動平均値によるc*効率
+                #"m/s",  # 実験値によるc*の移動中央値
+                #"-",  # 移動中央値によるc*効率
                 "g/cm^3",  # 燃焼室内密度
                 "s",  # 推進剤滞在時間
                 "mm",  # スロート径
@@ -280,10 +314,12 @@ class Gen_data:
                 "mm",  # 燃焼室特性長さ
                 "-",  # 混合比
                 "g/cm^3",  # 推進剤密度
-                "-"  # モード
+                "-",  # モード
+                "Lohm"  # アトマイザのLohm Rate
             ]
         ]
         
+        # ---5---出力する項目の平均値
         result_data_ave.append(
             [  # 各種実験データ
                 dirs,  # 実験番号
@@ -300,13 +336,14 @@ class Gen_data:
                 cf_act_ave,  # 効率をかけた実際の推力係数
                 thrust_ave,  # 推力
                 isp_vac_ave,  # 比推力
+                #isp_vac_mm_ave,  # 比推力の移動中央値
                 cstar_cea_ave,  # ceaによるc*
                 cstar_cal_ave,  # 実験値によるc*
                 cstar_effi_ave,  # c*効率
-                cstar_cal_ma_ave,  # 実験値によるc*の移動平均値
-                cstar_effi_ma_ave,  # 移動平均値によるc*効率
-                cstar_cal_mm_ave,  # 実験値によるc*の移動中央値
-                cstar_effi_mm_ave,  # 移動中央値によるc*効率
+                #cstar_cal_ma_ave,  # 実験値によるc*の移動平均値
+                #cstar_effi_ma_ave,  # 移動平均値によるc*効率
+                #cstar_cal_mm_ave,  # 実験値によるc*の移動中央値
+                #cstar_effi_mm_ave,  # 移動中央値によるc*効率
                 density_ave,  # 燃焼室内密度
                 stay_time_ave,  # 推進剤滞在時間
                 Dt,  # スロート径
@@ -314,7 +351,8 @@ class Gen_data:
                 Lster,  # 燃焼室特性長さ
                 MR,  # 混合比
                 OF_RHO,  # 推進剤密度
-                sel_bm  # モード
+                sel_bm,  # モード
+                LR  # アトマイザのLohm Rate
             ]
         )
 
@@ -331,6 +369,8 @@ class Gen_data:
         # ---------------------
 
         # 計算に用いたデータを全てcsvで出力
+        
+        # ---6---出力する項目のヘッダー
         result_data_all = [
             [
                 "Time",  # 噴射時間
@@ -343,14 +383,15 @@ class Gen_data:
                 "Cf_cea[-]",  # ceaによる推力係数
                 "Cf_act[-]",  # 効率をかけた実際の推力係数
                 "F[mN]",  # 推力
-                "Isp[sec]",  # 比推力
+                "Isp[s]",  # 比推力
+                #"Isp_mmm[s]",  # 比推力の移動中央値
                 "Cstar_cea[m/s]",  # ceaによるc*
                 "Cater_cal[m/s]",  # 実験値によるc*
                 "Cstar_effi[-]",  # c*効率
-                "Cstar_ma[m/s]",  # 実験値によるc*の移動平均値
-                "Cstar_effi_ma[-]",  # 移動平均値によるc*効率
-                "Cstar_mm[m/s]",  # 実験値によるc*の移動中央値
-                "Cstar_effi_ma[-]",  # 移動中央値によるc*効率
+                #"Cstar_ma[m/s]",  # 実験値によるc*の移動平均値
+                #"Cstar_effi_ma[-]",  # 移動平均値によるc*効率
+                #"Cstar_mm[m/s]",  # 実験値によるc*の移動中央値
+                #"Cstar_effi_ma[-]",  # 移動中央値によるc*効率
                 "Den[g/cm^3]",  # 燃焼室内密度
                 "ts[s]",  # 推進剤滞在時間
                 "Dt[mm]",  # スロート径
@@ -358,9 +399,12 @@ class Gen_data:
                 "L*[mm]",  # 燃焼室特性長さ
                 "O/F[-]",  # 混合比
                 "RHO[g/cm^3]",  # 推進剤密度
-                "Slect B/M[-]", # モード
+                "Slect B/M[-]",  # モード
+                "Lohm Rate[Lohm]"  # アトマイザのLohm Rate
             ]
         ]
+
+        # ---7---出力する項目
         for i in range(len(self.valve_data)):
             result_data_all.append(
                 [
@@ -375,13 +419,14 @@ class Gen_data:
                     self.cf_act_data[i],  # 効率をかけた実際の推力係数
                     self.thrust_data[i],  # 推力
                     self.isp_vac_data[i],  # 比推力
+                    #self.isp_vac_mm_data[i],  # 比推力の移動中央値
                     self.cstar_cea_data[i],  # ceaによるc*
                     self.cstar_cal_data[i],  # 実験値によるc*
                     self.cstar_effi_data[i],  # c*効率
-                    self.cstar_cal_ma_data[i],  # 実験値によるc*の移動平均値
-                    self.cstar_effi_ma_data[i],  # 移動平均値によるc*効率
-                    self.cstar_cal_mm_data[i],  # 実験値によるc*の移動中央値
-                    self.cstar_effi_mm_data[i],  # 移動中央値によるc*効率
+                    #self.cstar_cal_ma_data[i],  # 実験値によるc*の移動平均値
+                    #self.cstar_effi_ma_data[i],  # 移動平均値によるc*効率
+                    #self.cstar_cal_mm_data[i],  # 実験値によるc*の移動中央値
+                    #self.cstar_effi_mm_data[i],  # 移動中央値によるc*効率
                     self.density_data[i],  # 燃焼室内密度
                     self.stay_time_data[i],  # 推進剤滞在時間
                     Dt,  # スロート径
@@ -389,7 +434,8 @@ class Gen_data:
                     Lster,  # 燃焼室特性長さ
                     MR,  # 混合比
                     OF_RHO,  # 推進剤密度
-                    sel_bm  # モード
+                    sel_bm,  # モード
+                    LR  # アトマイザのLohm Rate
                 ]
             )
         with open(filename_result_all + "_" + dirs + ".csv", "w", newline="") as f:

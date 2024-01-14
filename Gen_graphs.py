@@ -18,7 +18,7 @@ class Gen_graphs(Gen_data):
         fig1 = plt.figure(figsize=[10.0, 7.5])
         plt.rcParams["font.size"] = 17
         
-        # グラフ描写の１つ目(チャンバ内圧力とチャンバ内温度)
+        # グラフ描写の１つ目(燃焼室内圧力と燃焼室内温度)
         
         # チャンバ内圧力
         ax1_1 = fig1.add_subplot(1, 1, 1)
@@ -27,6 +27,7 @@ class Gen_graphs(Gen_data):
         ax1_1.set_xlabel("Time[sec]")
         ax1_1.set_ylabel("Camber pressure[MPaA]")
         ax1_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax1_1.set_title("燃焼室圧力と燃焼室内温度", fontname='MS Gothic')
 
         # チャンバ内温度
         ax1_2 = ax1_1.twinx()
@@ -50,7 +51,7 @@ class Gen_graphs(Gen_data):
         # 図のクリア
         plt.clf()
 
-        # グラフ描写の２つ目(圧力と流量)
+        # グラフ描写の２つ目(燃焼室内圧力と質量流量)
 
         # チャンバ内圧力
         ax2_1 = fig1.add_subplot(1, 1, 1)
@@ -59,6 +60,7 @@ class Gen_graphs(Gen_data):
         ax2_1.set_xlabel("time[sec]")
         ax2_1.set_ylabel("camber pressure[MPaA]")
         ax2_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax2_1.set_title("燃焼室内圧力と質量流量", fontname='MS Gothic')
 
         # 質量流量
         ax2_2 = ax2_1.twinx()
@@ -93,6 +95,7 @@ class Gen_graphs(Gen_data):
         ax3_1.set_xlabel("time[sec]")
         ax3_1.set_ylabel("Thrust[mN]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax3_1.set_title("推力と推力係数", fontname='MS Gothic')
 
         # 推力係数
         ax3_2 = ax3_1.twinx()
@@ -119,19 +122,20 @@ class Gen_graphs(Gen_data):
         # 図のクリア
         plt.clf()
 
-        # グラフ描写の4つ目(c*とc*効率)
+        # グラフ描写の4つ目(c*とc*効率の元データ)
 
         # c*
         ax4_1 = fig1.add_subplot(1, 1, 1)
-        ax4_1.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="m", label="cstar")
+        ax4_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
         ax4_1.set_ylim(0, 4000)  # プロットのY範囲
         ax4_1.set_xlabel("Time[s]")
         ax4_1.set_ylabel("Characteristic exhaust velocity[m/s]")
         ax4_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax4_1.set_title("c*とc*効率の元データ", fontname='MS Gothic')
 
         # c*効率
         ax4_2 = ax4_1.twinx()
-        ax4_2.plot(self.gd.x, self.gd.cstar_effi_ma_data, color="k", label="cstar_effi")
+        ax4_2.plot(self.gd.x, self.gd.cstar_effi_data, color="k", label="cstar_effi")
         ax4_2.set_ylim(0, 1.6)  # プロットのY範囲
         ax4_2.set_ylabel("Cstar_efficiency[-]")
         
@@ -151,6 +155,76 @@ class Gen_graphs(Gen_data):
         # 図のクリア
         plt.clf()
 
+        '''
+        
+        # グラフ描写の5つ目(c*とc*効率の移動平均法)
+
+        # c*
+        ax5_1 = fig1.add_subplot(1, 1, 1)
+        ax5_1.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="m", label="cstar")
+        ax5_1.set_ylim(0, 4000)  # プロットのY範囲
+        ax5_1.set_xlabel("Time[s]")
+        ax5_1.set_ylabel("Characteristic exhaust velocity[m/s]")
+        ax5_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax5_1.set_title("c*とc*効率の移動平均法", fontname='MS Gothic')
+
+        # c*効率
+        ax5_2 = ax5_1.twinx()
+        ax5_2.plot(self.gd.x, self.gd.cstar_effi_ma_data, color="k", label="cstar_effi")
+        ax5_2.set_ylim(0, 1.6)
+        ax5_2.set_ylabel("Cstar_efficiency[-]")
+
+        # バルブ電圧
+        ax5_3 = ax5_1.twinx()
+        ax5_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
+        ax5_3.set_ylim(0, 5)  # プロットのY範囲
+        ax5_3.axis("off")
+
+        # 凡例
+        h1, l1 = ax5_1.get_legend_handles_labels()
+        h2, l2 = ax5_2.get_legend_handles_labels()
+        ax5_1.legend(h1 + h2, l1 + l2)
+
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_fig5" + extension)
+        # 図のクリア
+        plt.clf()
+
+        # グラフ描写の6つ目(c*とc*効率の移動中央値法)
+
+        # c*
+        ax6_1 = fig1.add_subplot(1, 1, 1)
+        ax6_1.plot(self.gd.x, self.gd.cstar_cal_mm_data, color="m", label="cstar")
+        ax6_1.set_ylim(0, 4000)  # プロットのY範囲
+        ax6_1.set_xlabel("Time[s]")
+        ax6_1.set_ylabel("Characteristic exhaust velocity[m/s]")
+        ax6_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax6_1.set_title("c*とc*効率の移動中央値法", fontname='MS Gothic')
+
+        # c*効率
+        ax6_2 = ax6_1.twinx()
+        ax6_2.plot(self.gd.x, self.gd.cstar_effi_mm_data, color="k", label="cstar_effi")
+        ax6_2.set_ylim(0, 1.6)
+        ax6_2.set_ylabel("Cstar_efficiency[-]")
+
+        # バルブ電圧
+        ax6_3 = ax6_1.twinx()
+        ax6_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
+        ax6_3.set_ylim(0, 5)  # プロットのY範囲
+        ax6_3.axis("off")
+
+        # 凡例
+        h1, l1 = ax6_1.get_legend_handles_labels()
+        h2, l2 = ax6_2.get_legend_handles_labels()
+        ax6_1.legend(h1 + h2, l1 + l2)
+
+        # 図の保存
+        plt.savefig(path + "\\" + dirs + "_fig6" + extension)
+        # 図のクリア
+        plt.clf()
+
+        '''
+
         # グラフ描写の5つ目(推進剤滞在時間とチャンバ内密度)
 
         # 推進剤滞在時間
@@ -160,6 +234,7 @@ class Gen_graphs(Gen_data):
         ax5_1.set_xlabel("Time[s]")
         ax5_1.set_ylabel("Propellant stay time[s]")
         ax5_1.grid(color='k', linestyle=':', linewidth=0.3)
+        ax5_1.set_title("推進剤滞在時間とチャンバ内密度", fontname='MS Gothic')
 
         # チャンバ内密度
         ax5_2 = ax5_1.twinx()
@@ -182,45 +257,6 @@ class Gen_graphs(Gen_data):
 
         # 図の保存
         plt.savefig(path + "\\" + dirs + "_fig5" + extension)
-        # 図のクリア
-        plt.clf()
-
-        # グラフ描写の6つ目(c*の元データと移動平均値と移動中央値)
-
-        # 元データ
-        ax6_1 = fig1.add_subplot(1, 1, 1)
-        ax6_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
-        ax6_1.set_ylim(0, 4000)  # プロットのY範囲
-        ax6_1.set_xlabel("Time[s]")
-        ax6_1.set_ylabel("Characteristic exhaust velocity[m/s]")
-        ax6_1.grid(color='k', linestyle=':', linewidth=0.3)
-
-        # 移動平均値
-        ax6_2 = ax6_1.twinx()
-        ax6_2.plot(self.gd.x, self.gd.cstar_cal_ma_data, color="c", label="cstar_mean")
-        ax6_2.set_ylim(0, 4000)
-        ax6_2.set_ylabel("Characteristic exhaust velocity mean [m/s]")
-
-        # 移動中央値
-        ax6_3 = ax6_1.twinx()
-        ax6_3.plot(self.gd.x, self.gd.cstar_cal_mm_data, color="y", label="cstar_median")
-        ax6_3.set_ylim(0, 4000)
-        ax6_3.set_ylabel("Characteristic exhaust velocity median [m/s]")
-
-        # バルブ電圧
-        ax6_4 = ax6_1.twinx()
-        ax6_4.plot(self.gd.x, self.gd.valve_data, color="k", label="valve")
-        ax6_4.set_ylim(0, 5)  # プロットのY範囲
-        ax6_4.axis("off")
-
-        # 凡例
-        h1, l1 = ax6_1.get_legend_handles_labels()
-        h2, l2 = ax6_2.get_legend_handles_labels()
-        h3, l3 = ax6_3.get_legend_handles_labels()
-        ax6_1.legend(h1 + h2 + h3, l1 + l2 + l3)
-
-        # 図の保存
-        plt.savefig(path + "\\" + dirs + "_fig6" + extension)
         # 図のクリア
         plt.clf()
 

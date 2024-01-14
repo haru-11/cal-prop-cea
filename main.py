@@ -21,7 +21,7 @@ filename_data = []
 data_dir = '生データ'
 
 #2. 解析結果を格納するために生成するフォルダ名
-result_dir = '解析結果_おためし'
+result_dir = '解析結果_最終版_3'
 
 #3. 実験結果があるエクセルのcsvファイル名
 data_filename = 'MB$0'
