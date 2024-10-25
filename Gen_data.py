@@ -69,7 +69,7 @@ class Gen_data:
         if MR > 0:
             OF_RHO = (O_RHO * F_RHO) * (1 + MR)/(O_RHO + F_RHO * MR)
         elif MR == 0:
-            OF_RHO = 1.24  # 推進剤の密度
+            OF_RHO = O_RHO  # 推進剤の密度
         else:
             print("O/F ERROR")
         nozzle_factor = 0.5*(1+ cos(Nozzle_cone_half_ang/180*3.141592)) #ノズル修正係数の計算
