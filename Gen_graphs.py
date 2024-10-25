@@ -23,15 +23,15 @@ class Gen_graphs(Gen_data):
         )
         ax1_1.set_ylim(0, 0.5)  # プロットのY範囲
         ax1_1.set_xlabel("Time[sec]")
-        ax1_1.set_ylabel("Camber pressure[MPaA]")
+        ax1_1.set_ylabel("Chamber pressure[MPaA]")
         ax1_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         ax1_2 = ax1_1.twinx()
         ax1_2.plot(
-            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp"
+            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temperature"
         )
         ax1_2.set_ylim(0, 1000)  # プロットのY範囲
-        ax1_2.set_ylabel("Camber temperature[℃]")
+        ax1_2.set_ylabel("Chamber temperature[℃]")
 
         ax1_3 = ax1_1.twinx()
         ax1_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
@@ -52,13 +52,13 @@ class Gen_graphs(Gen_data):
         )
         ax2_1.set_ylim(0, 0.5)  # プロットのY範囲
         ax2_1.set_xlabel("time[sec]")
-        ax2_1.set_ylabel("camber pressure[MPaA]")
+        ax2_1.set_ylabel("chamber pressure[MPaA]")
         ax2_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         ax2_2 = ax2_1.twinx()
         ax2_2.plot(self.gd.x, self.gd.flow_rate_data, color="c", label="flow_rate")
         ax2_2.set_ylim(0, 1.0)  # プロットのY範囲
-        ax2_2.set_ylabel("flow rate[ml/s]")
+        ax2_2.set_ylabel("flow rate[g/s]")
 
         ax2_3 = ax2_1.twinx()
         ax2_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
