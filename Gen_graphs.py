@@ -28,15 +28,17 @@ class Gen_graphs(Gen_data):
 
         ax1_2 = ax1_1.twinx()
         ax1_2.plot(
-            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temp_L"
+            self.gd.x, self.gd.chamber_temperature_data, color="red", label="temperature"
         )
+        """
         ax1_2.plot(
             self.gd.x, self.gd.chamber_Middle_temperature_data, color="m", label="temp_M"
         )
         ax1_2.plot(
             self.gd.x, self.gd.chamber_Upper_temperature_data, color="g", label="temp_U"
         )
-        ax1_2.set_ylim(0, 1200)  # プロットのY範囲
+        """
+        ax1_2.set_ylim(0, 200)  # プロットのY範囲
 
         ax1_2.set_ylabel("Camber temperature[℃]")
 
@@ -64,8 +66,8 @@ class Gen_graphs(Gen_data):
 
         ax2_2 = ax2_1.twinx()
         ax2_2.plot(self.gd.x, self.gd.flow_rate_data, color="c", label="flow_rate")
-        ax2_2.set_ylim(0, 2.0)  # プロットのY範囲
-        ax2_2.set_ylabel("flow rate[ml/s]")
+        ax2_2.set_ylim(0, 5.0)  # プロットのY範囲
+        ax2_2.set_ylabel("flow rate[g/s]") #20241024修正「ml/s→g/s」
 
         ax2_3 = ax2_1.twinx()
         ax2_3.plot(self.gd.x, self.gd.valve_data, color="blue", label="valve")
@@ -87,7 +89,7 @@ class Gen_graphs(Gen_data):
         #ax3_1.plot(self.gd.x, self.gd.cstar_cal_data, color="m", label="cstar")
         ax3_1.set_ylim(0, 1000)  # プロットのY範囲
         ax3_1.set_xlabel("time[sec]")
-        ax3_1.set_ylabel("Thrust[N]")
+        ax3_1.set_ylabel("Thrust[mN]")
         ax3_1.grid(color='k', linestyle=':', linewidth=0.3)
 
         
@@ -155,7 +157,7 @@ class Gen_graphs(Gen_data):
         #print(data_csv)
         data_len = len(data_csv)
         header = data_csv[0]
-        print(data_len)
+        print(data_len) #二次元配列内のリストの要素数
         print(header)
 
         data_head_num = 1

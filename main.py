@@ -12,10 +12,11 @@ g_gif = gen_gif.Gen_gif()
 filename_data = []
 
 # １．【毎回変更する】実験データが格納されているフォルダ
-zikken_path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2023実験\\231009_新インジェクタ噴射試験\\一液\\解析データ"
+# 00_ダミーデータを入れることで，01以降のCf_actが正しく算出される
+zikken_path = "Z:\\書庫\\研究テーマ\\推進系\\実験\\FY2024実験\\241015_LeeINJ一液予熱再現実験_合130℃\\解析データ\\130℃" 
 
 # ２．【毎回変更する】生成ファイルを格納するフォルダ
-result_path = "X:\\書庫\\研究テーマ\\推進系\\実験\\FY2023実験\\231009_新インジェクタ噴射試験\\一液\\解析結果"
+result_path = "Z:\\書庫\\研究テーマ\\推進系\\実験\\FY2024実験\\241015_LeeINJ一液予熱再現実験_合130℃\\解析結果\\130℃"
 
 
 # ３．一液式の場合は１を，二液式の場合は２を入れる．
@@ -23,9 +24,9 @@ sel_bm = 1
 
 graph_file_extension = ".png"
 filename_result_ave = result_path + "\\result_ave.csv"
+filename_result_std = result_path + "\\result_std.csv"
 filename_result_all = result_path + "\\result_all"
-#filename_wavelogger = "auto$0.csv"
-filename_wavelogger = "auto$0.csv"
+filename_wavelogger = "M$0.csv"
 
 dirs = os.listdir(zikken_path)
 print("読み込んだフォルダリストは以下です．")
@@ -40,20 +41,28 @@ for i in range(len(dirs)):
     print("処理中のフォルダ：" + dirs[i])
 
     #データ処理
-    gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, dirs[i], sel_bm)
-
-    # 時系列グラフ生成
-    gg.gen_graphs(result_path, dirs[i], graph_file_extension)
+    if i ==0: #00_ダミーデータをfilename_result_ave, filename_result_stdへ含めないために消す．
+        gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, filename_result_std, dirs[i], sel_bm)
+        if(os.path.isfile(filename_result_ave) or os.path.isfile(filename_result_std)):
+            os.remove(filename_result_ave)
+            os.remove(filename_result_std)
+    else:
+        gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, filename_result_std, dirs[i], sel_bm)
+        # 時系列グラフ生成
+        gg.gen_graphs(result_path, dirs[i], graph_file_extension)
+        #推進剤使用量系列グラフ生成
+        gg.gen_graphs_ave(result_path,filename_result_ave)
     
     print("完了：" + dirs[i])
 
-#推進剤使用量系列グラフ生成
-gg.gen_graphs_ave(result_path,filename_result_ave)
-
 #図のgif画像生成
+print("")
 print("gif生成中")
-for i in range(4):
-    g_gif.gen_gif(result_path, dirs, i+1, 200)
+dirs_2 = os.listdir(zikken_path) #gif画像を作るためにフォルダ名を取得
+dirs_2.remove("00_ダミーデータ") #00_ダミーデータは不要のため削除
+print(dirs_2) #gif画像生成に使うフォルダ名一覧を確認
+for i in range(4): #4種類のgif画像生成
+    g_gif.gen_gif(result_path, dirs_2, i+1, 200)
 print("gif生成完了")
 
 #gg.gen_graphs_ave(result_path, dirs[i], graph_file_extension,filename_result_ave)
