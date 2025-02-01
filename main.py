@@ -13,10 +13,10 @@ filename_data = []
 
 # １．【毎回変更する】実験データが格納されているフォルダ
 # 00_ダミーデータを入れることで，01以降のCf_actが正しく算出される
-zikken_path = "Z:\\書庫\\研究テーマ\\推進系\\実験\\FY2024実験\\241015_LeeINJ一液予熱再現実験_合130℃\\解析データ\\130℃" 
+zikken_path = "Z:\\書庫\\研究テーマ\\推進系\\実験\\FY2024実験\\241217_LeeINJ付け前処理形状変更一液予熱150℃_合\\解析データ" 
 
 # ２．【毎回変更する】生成ファイルを格納するフォルダ
-result_path = "Z:\\書庫\\研究テーマ\\推進系\\実験\\FY2024実験\\241015_LeeINJ一液予熱再現実験_合130℃\\解析結果\\130℃"
+result_path = "Z:\\書庫\\研究テーマ\\推進系\\実験\\FY2024実験\\241217_LeeINJ付け前処理形状変更一液予熱150℃_合\\解析結果3"
 
 
 # ３．一液式の場合は１を，二液式の場合は２を入れる．
@@ -24,6 +24,7 @@ sel_bm = 1
 
 graph_file_extension = ".png"
 filename_result_ave = result_path + "\\result_ave.csv"
+filename_result_ave2 = result_path + "\\result_ave2.csv"
 filename_result_std = result_path + "\\result_std.csv"
 filename_result_all = result_path + "\\result_all"
 filename_wavelogger = "M$0.csv"
@@ -42,12 +43,13 @@ for i in range(len(dirs)):
 
     #データ処理
     if i ==0: #00_ダミーデータをfilename_result_ave, filename_result_stdへ含めないために消す．
-        gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, filename_result_std, dirs[i], sel_bm)
-        if(os.path.isfile(filename_result_ave) or os.path.isfile(filename_result_std)):
+        gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, filename_result_ave2, filename_result_std, dirs[i], sel_bm)
+        if(os.path.isfile(filename_result_ave) or os.path.isfile(filename_result_ave2) or os.path.isfile(filename_result_std)):
             os.remove(filename_result_ave)
+            os.remove(filename_result_ave2)
             os.remove(filename_result_std)
     else:
-        gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, filename_result_std, dirs[i], sel_bm)
+        gd.gen_data(filename_data[i], filename_result_all, filename_result_ave, filename_result_ave2, filename_result_std, dirs[i], sel_bm)
         # 時系列グラフ生成
         gg.gen_graphs(result_path, dirs[i], graph_file_extension)
         #推進剤使用量系列グラフ生成

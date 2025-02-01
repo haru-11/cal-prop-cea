@@ -27,9 +27,9 @@ class Gen_data:
     def __init__(self):
         print("Active Generate data")
         self.total_throughput_sum = []
-        self.chamber_pressure_ave_sum = []
+        self.chamber_pressure_ave_sum = [] #謎のリストが定義されている．
 
-    def gen_data(self, filename_data, filename_result_all, filename_result_ave, filename_result_std, dirs, sel_bm): #標準偏差を追加
+    def gen_data(self, filename_data, filename_result_all, filename_result_ave, filename_result_ave2,filename_result_std, dirs, sel_bm): #標準偏差，平均値2を追加
         # csv読み込み．waveloggerの設定をいじらなければ変えなくて良い．
         with open(filename_data, newline="", encoding="shift-jis") as f:
             reader = csv.reader(f)
@@ -58,17 +58,17 @@ class Gen_data:
         MR = 0.0     #OFを入力．一液の場合は0を記入
         Pre_TRG = 2  # [sec]バルブ開の前後何秒グラフ描写,データ生成するか？（intのみ）
         Valve_TRG = 3.002  # [V]バルブの立ち上がりのエッジトリガの閾値
-        Statick_ratio = 0.2  # [-]定常区間の割合を指定
+        Statick_ratio = float(2/10)  # [-]定常区間の割合を指定
         moving_average_num = 5 #移動平均の個数
 
-        valve_column = 7  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
-        Pc_column = 3  # チャンバ圧力のカラム
+        valve_column = 9  # バルブ電圧のカラムが，CSVの何列目かを書く．A列が0，B列が1である．
+        Pc_column = 5  # チャンバ圧力のカラム
         Pt_column = 2  # 供給圧力がのカラム
         Pa_column = 4  # 直上圧力のカラム
-        flow_rate_column = 5  # 流量のカラム
-        Tc_column =  6# チャンバ下流の温度のカラム
-        TcM_column = 6 # チャンバ中流の温度のカラム
-        TcU_column = 6 # チャンバ上流の温度のカラム
+        flow_rate_column = 6  # 流量のカラム
+        Tc_column =  8# チャンバ下流の温度のカラム
+        TcM_column = 8 # チャンバ中流の温度のカラム
+        TcU_column = 8 # チャンバ上流の温度のカラム
 
 
         if MR > 0:
@@ -80,7 +80,7 @@ class Gen_data:
         nozzle_factor = 0.5*(1+ cos(Nozzle_cone_half_ang/180*3.141592)) #ノズル修正係数の計算
 
 
-        result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー
+        result_data_ave = [  # 平均値をcsvにまとめる時のヘッダー※z-のこと
             [
                 "No",
                 "start[s]",
@@ -96,7 +96,7 @@ class Gen_data:
                 "Sum[g]",
                 "Cf_cea[-]",
                 "Cf_act[-]",
-                "Cstar[m/s]",
+                "Cstar_act[m/s]",
                 "Cstar_cea[-]",
                 "Cstar_effi[-]",
                 "Isp_A[s]",
@@ -104,6 +104,34 @@ class Gen_data:
                 "start[s]",
                 "end[s]",
                 "Itotal_valveopenperiod[mNs]",
+                "AT[mm]", At_diameter, 
+                "O/F[-]", MR, 
+                "RHO[g/ml]",OF_RHO,
+                "Slect B/M", sel_bm
+            ]
+        ]
+
+        result_data_ave2 = [  # 平均値2をcsvにまとめる時のヘッダー※z^のこと
+            [
+                "No",
+                "start[s]",
+                "end[s]",
+                "Pt_A[MPaA]",
+                "Pa_A[MPaA]",
+                "Pc_A[MPaA]",
+                "Tc_A[℃]",
+                "TcM_A[℃]",
+                "TcU_A[℃]",
+                "Mmfr_A[g/s]",
+                "Total[g]",
+                "Sum[g]",
+                "Cf_cea[-]",
+                "Cf_act[-]",
+                "Cstar_act[m/s]",
+                "Cstar_cea[-]",
+                "Cstar_effi[-]",
+                "Isp_A[s]",
+                "F_A[mN]",
                 "AT[mm]", At_diameter, 
                 "O/F[-]", MR, 
                 "RHO[g/ml]",OF_RHO,
@@ -127,7 +155,7 @@ class Gen_data:
                 "Sum[g]",
                 "Cf_cea[-]",
                 "Cf_act[-]",
-                "Cstar[m/s]",
+                "Cstar_act[m/s]",
                 "Cstar_cea[-]",
                 "Cstar_effi[-]",
                 "Isp_A[s]",
@@ -270,7 +298,7 @@ class Gen_data:
         
         # ------------------------------
 
-        # 定常区間の平均値を取得
+        # 定常区間の平均値を取得※ここでの平均値はz-のこと(zは多変数関数だが，それぞれ測定値a,b,c...から逐次zを計算し，平均値求める．zの母集団？が分かっている．自分の修論での定義と違う．)
         Static_start_num = int(
             (plt_end_num - plt_start_num - (Pre_TRG * Interval * 2))
             * (1 - Statick_ratio)
@@ -302,13 +330,13 @@ class Gen_data:
         isp_vac_ave = sum(self.isp_vac_data[Static_start_num:Static_end_num]) / len(
             self.isp_vac_data[Static_start_num:Static_end_num]
         )
-        cstar_ave = sum(self.cstar_cal_data[Static_start_num:Static_end_num]) / len(
+        cstar_act_ave = sum(self.cstar_cal_data[Static_start_num:Static_end_num]) / len(
             self.cstar_cal_data[Static_start_num:Static_end_num]
         )
         cstar_cea_ave = sum(self.cstar_data[Static_start_num:Static_end_num]) / len(
             self.cstar_data[Static_start_num:Static_end_num]
         )
-        cstar_effi_ave = cstar_ave / cstar_cea_ave
+        cstar_effi_ave = cstar_act_ave / cstar_cea_ave
         thrust_ave = sum(self.thrust_data[Static_start_num:Static_end_num]) / len(
             self.thrust_data[Static_start_num:Static_end_num]
         )
@@ -329,7 +357,7 @@ class Gen_data:
         else:
             _tt = self.total_throughput_sum[len(self.total_throughput_sum)-1] + total_throughput
         self.total_throughput_sum.append(_tt)
-        self.chamber_pressure_ave_sum.append(chamber_pressure_ave)
+        self.chamber_pressure_ave_sum.append(chamber_pressure_ave) #謎のリストに燃焼室圧力の平均が入れられている謎．特にこれで計算はしていなさそう．
 
         result_data_ave.append(
             [
@@ -347,7 +375,7 @@ class Gen_data:
                 self.total_throughput_sum[len(self.total_throughput_sum)-1],
                 cf_cea_ave,
                 cf_act_ave,
-                cstar_ave,
+                cstar_act_ave,
                 cstar_cea_ave,
                 cstar_effi_ave,
                 isp_vac_ave,
@@ -368,7 +396,84 @@ class Gen_data:
                 writer.writerow(result_data_ave[0])
             writer.writerow(result_data_ave[1])
 
-        # 定常区間の標準偏差を取得
+
+        # 定常区間の平均値2を取得※ここでの平均値はz^のこと(zは多変数関数だが，それぞれ測定値a,b,c...の平均値を取ってからzの平均値求める．自分の修論での定義と同じ．)
+        chamber_pressure_ave2 = sum(
+            self.chamber_pressure_data[Static_start_num:Static_end_num]
+        ) / len(self.chamber_pressure_data[Static_start_num:Static_end_num])
+        supply_pressure_ave2 = sum(
+            self.supply_pressure_data[Static_start_num:Static_end_num]
+        ) / len(self.supply_pressure_data[Static_start_num:Static_end_num])
+        above_pressure_ave2 = sum(
+            self.above_pressure_data[Static_start_num:Static_end_num]
+        ) / len(self.above_pressure_data[Static_start_num:Static_end_num])
+        chamber_temperature_ave2 = sum(
+            self.chamber_temperature_data[Static_start_num:Static_end_num]
+        ) / len(self.chamber_temperature_data[Static_start_num:Static_end_num])
+        chamber_Middle_temperature_ave2 = sum(
+            self.chamber_Middle_temperature_data[Static_start_num:Static_end_num]
+        ) / len(self.chamber_temperature_data[Static_start_num:Static_end_num])
+        chamber_Upper_temperature_ave2 = sum(
+            self.chamber_Upper_temperature_data[Static_start_num:Static_end_num]
+        ) / len(self.chamber_temperature_data[Static_start_num:Static_end_num])
+        flow_rate_ave2 = sum(self.flow_rate_data[Static_start_num:Static_end_num]) / len(
+            self.flow_rate_data[Static_start_num:Static_end_num]
+        )
+        pambcf2 = ispObj_1.get_PambCf(Pamb=0.000001, Pc=(float(chamber_pressure_ave2) * 145.038), eps=100.0)
+        cf_cea_ave2 = pambcf2[0]
+        cf_act_ave2 = cf_cea_ave2*nozzle_factor*Thrust_coefficient_effi
+        vac_cstar_tc2 = ispObj_1.get_IvacCstrTc(
+                    (float(chamber_pressure_ave2) * 145.038),
+                    eps=100.0,
+                    frozen=0,
+                    frozenAtThroat=0,
+                )
+        thrust_ave2 = float(chamber_pressure_ave2) * cf_act_ave2 * At * 1000
+        if flow_rate_ave2 == 0:
+            cstar_ave2 = 0
+            isp_vac_ave2 = 0
+        else:
+            cstar_ave2 = chamber_pressure_ave2*At/(flow_rate_ave2/1000)
+            isp_vac_ave2 = thrust_ave2/(flow_rate_ave2* 9.80665)
+        
+        cstar_cea_ave2 =float(vac_cstar_tc2[1])* 0.3048
+        cstar_effi_ave2 = cstar_ave2 / cstar_cea_ave2
+
+        result_data_ave2.append(
+            [
+                dirs,
+                (Static_start_num - (Pre_TRG * Interval)) / Interval,
+                (Static_end_num - (Pre_TRG * Interval)) / Interval,
+                supply_pressure_ave2,
+                above_pressure_ave2,
+                chamber_pressure_ave2,
+                chamber_temperature_ave2,
+                chamber_Middle_temperature_ave2,
+                chamber_Upper_temperature_ave2,
+                flow_rate_ave2,
+                total_throughput,
+                self.total_throughput_sum[len(self.total_throughput_sum)-1],
+                cf_cea_ave2,
+                cf_act_ave2,
+                cstar_ave2,
+                cstar_cea_ave2,
+                cstar_effi_ave2,
+                isp_vac_ave2,
+                thrust_ave2,
+            ]
+        )
+
+        with open(filename_result_ave2, "a", newline="") as f:  # まずファイルを作成
+            writer = csv.writer(f)
+        with open(filename_result_ave2, newline="") as f:  # ファイルを読む
+            r = f.read()
+        with open(filename_result_ave2, "a", newline="") as f:  # csvで平均値を保存
+            writer = csv.writer(f)
+            if r == "":  # ファイルの中身が空の場合は，ヘッダーを追加
+                writer.writerow(result_data_ave2[0])
+            writer.writerow(result_data_ave2[1])
+
+         # 定常区間の標準偏差を取得
         chamber_pressure_std = np.std(
             self.chamber_pressure_data[Static_start_num:Static_end_num]
         )
@@ -391,11 +496,11 @@ class Gen_data:
         )
         isp_vac_std = np.std(self.isp_vac_data[Static_start_num:Static_end_num]
         )
-        cstar_std = np.std(self.cstar_cal_data[Static_start_num:Static_end_num]
+        cstar_act_std = np.std(self.cstar_cal_data[Static_start_num:Static_end_num]
         )
         cstar_cea_std = np.std(self.cstar_data[Static_start_num:Static_end_num]
         )
-        cstar_effi_std = cstar_ave / cstar_cea_ave
+        cstar_effi_std = cstar_act_ave / cstar_cea_ave
         thrust_std = np.std(self.thrust_data[Static_start_num:Static_end_num]
         )
         cf_act_std = np.std(self.cf_act_data[Static_start_num:Static_end_num]
@@ -403,7 +508,7 @@ class Gen_data:
         cf_cea_std = np.std(self.cf_cea_data[Static_start_num:Static_end_num]
         )
 
-        #バルブ開区間の合計を算出
+        #バルブ開区間の合計を算出（？？間違いか？コピペしたからそのまま残っただけ？）
         result_data_std.append(
             [
                 dirs,
@@ -420,7 +525,7 @@ class Gen_data:
                 self.total_throughput_sum[len(self.total_throughput_sum)-1],
                 cf_cea_std,
                 cf_act_std,
-                cstar_std,
+                cstar_act_std,
                 cstar_cea_std,
                 cstar_effi_std,
                 isp_vac_std,
@@ -457,7 +562,7 @@ class Gen_data:
                 "Cf_cea[-]",
                 "Cf_act[-]",
                 "Cstar_CEA[sec]",
-                "Cater_cal[sec]",
+                "Cstar_cal[sec]",
                 "Cstar_effi[-]",
                 "Isp[sec]",
                 "F[mN]",
